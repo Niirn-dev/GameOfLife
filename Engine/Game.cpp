@@ -54,7 +54,15 @@ void Game::UpdateModel()
 	elapsedTime += ft.Mark();
 	while ( elapsedTime >= stepTime )
 	{
+		b.Start();
+
 		pBrd->Update();
+
+		if ( b.End() )
+		{
+			OutputDebugStringW( ( (std::wstring)b ).c_str() );
+		}
+
 		elapsedTime -= stepTime;
 	}
 }

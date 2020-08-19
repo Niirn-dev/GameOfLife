@@ -1,0 +1,11 @@
+Initial -- 0.5 step -- Debug
+Sample size:10
+Min:	865.279ms
+Max:	880.257ms
+Mean:	873.234ms
+
+Initial -- 0.5 step -- Release
+Sample size:10
+Min:	11.54ms
+Max:	11.7615ms
+Mean:	11.6632ms
