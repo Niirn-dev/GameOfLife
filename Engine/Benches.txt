@@ -10,15 +10,16 @@ Min:	11.54ms
 Max:	11.7615ms
 Mean:	11.6632ms
 
-( There's some spike in max time during first sampling )
-Iterate only over alive cells -- 0.5 step -- Debug
+Iterate only over alive cells -- 0.5 step -- 5000 cells start -- Debug
 Sample size:10
-Min:	0.0105ms
-Max:	0.0146ms
-Mean:	0.0108623ms
+Min:	634.425ms
+Max:	746.99ms
+Mean:	642.378ms
 
-Iterate only over alive cells -- 0.5 step -- Release
+Iterate only over alive cells -- 0.5 step -- 5000 cells start -- Release
 Sample size:10
-Min:	0.0004ms
-Max:	0.0012ms
-Mean:	0.000921973ms
+Min:	13.6025ms
+Max:	15.5977ms
+Mean:	13.768ms
+
+

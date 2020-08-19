@@ -1,6 +1,7 @@
 #include "Board.h"
 #include <cassert>
 #include <algorithm>
+#include <iterator>
 
 Board::Cell::Cell( State s )
 	:
@@ -51,8 +52,10 @@ void Board::Update()
 {
 	// Mark cells that are up for toggling
 	{
-		auto new_end = std::remove_if(
+		std::vector<Vei2> aliveNextGen;
+		std::copy_if(
 			aliveCellsPos.begin(),aliveCellsPos.end(),
+			std::back_inserter( aliveNextGen ),
 			[&]( const Vei2& pos ) 
 			{
 				// Figure out the future state of dead neighbors in the next generation
@@ -70,7 +73,7 @@ void Board::Update()
 							wasChecked[target] = true;
 							if ( CountAliveNeighbors( target ) == 3 )
 							{
-								upForToggling.push( pos );
+								upForToggling.push( target );
 							}
 						}
 					}
@@ -80,13 +83,14 @@ void Board::Update()
 				if ( int neighbs = CountAliveNeighbors( pos ); neighbs < 2 || neighbs > 3 )
 				{
 					upForToggling.push( pos );
-					// Remove from vector if the cell is gonna be dead
-					return true;
+					// Don't copy if it's gonna be dead
+					return false;
 				}
-				return false;
+				return true;
 			}
 		);
-		aliveCellsPos.erase( new_end,aliveCellsPos.end() );
+		// Put old alive cells that'll stay alive back in the tracking vector
+		aliveCellsPos = std::move( aliveNextGen );
 	}
 
 	// Toggle states for all marked cells and cleanup

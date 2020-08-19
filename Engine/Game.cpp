@@ -34,7 +34,7 @@ Game::Game( MainWindow& wnd )
 	std::uniform_int_distribution<int> yDist( 0,Board::GetHeight() - 1 );
 
 	std::vector<Vei2> pos;
-	for ( int i = 0; i < 500; ++i )
+	for ( int i = 0; i < 5000; ++i )
 	{
 		pos.emplace_back( xDist( rng ),yDist( rng ) );
 	}
