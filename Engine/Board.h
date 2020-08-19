@@ -17,7 +17,8 @@ private:
 			Dead,
 			Alive
 		};
-
+		Cell() = default;
+		Cell( State s );
 		bool IsAlive() const;
 		void ToggleState();
 
@@ -55,6 +56,8 @@ private:
 	static constexpr int height = Graphics::ScreenHeight / Cell::size;
 	std::unordered_map<Vei2,Cell> grid;
 
+	std::vector<Vei2> aliveCellsPos;
+	std::unordered_map<Vei2,bool> wasChecked;
 	std::queue<Vei2> upForToggling;
 public:
 	static constexpr int GetWidth()
