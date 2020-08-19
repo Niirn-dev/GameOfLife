@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <functional>
 
 template <typename T>
 class Vec2_
@@ -46,6 +47,14 @@ public:
 	{
 		return *this = *this - rhs;
 	}
+	bool operator==( const Vec2_& rhs ) const
+	{
+		return ( x == rhs.x ) && ( y == rhs.y );
+	}
+	bool operator!=( const Vec2_& rhs ) const
+	{
+		return !( *this == rhs );
+	}
 
 	T GetLength() const
 	{
@@ -75,3 +84,15 @@ public:
 
 using Vec2 = Vec2_<float>;
 using Vei2 = Vec2_<int>;
+
+namespace std
+{
+	template<>
+	struct hash<Vei2>
+	{
+		std::size_t operator()( const Vei2& v ) const noexcept
+		{
+			return ( v.x ^ ( v.y << 2 ) ) >> 1;
+		}
+	};
+}

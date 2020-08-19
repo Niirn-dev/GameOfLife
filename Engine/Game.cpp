@@ -20,12 +20,25 @@
  ******************************************************************************************/
 #include "MainWindow.h"
 #include "Game.h"
+#include <vector>
+#include "Vec2.h"
+#include <random>
 
 Game::Game( MainWindow& wnd )
 	:
 	wnd( wnd ),
 	gfx( wnd )
 {
+	std::mt19937 rng( std::random_device{}() );
+	std::uniform_int_distribution<int> xDist( 0,99 );
+	std::uniform_int_distribution<int> yDist( 0,59 );
+
+	std::vector<Vei2> pos;
+	for ( int i = 0; i < 500; ++i )
+	{
+		pos.emplace_back( xDist( rng ),yDist( rng ) );
+	}
+	pBrd = std::make_unique<Board>( pos );
 }
 
 void Game::Go()
@@ -38,8 +51,15 @@ void Game::Go()
 
 void Game::UpdateModel()
 {
+	elapsedTime += ft.Mark();
+	while ( elapsedTime >= stepTime )
+	{
+		pBrd->Update();
+		elapsedTime -= stepTime;
+	}
 }
 
 void Game::ComposeFrame()
 {
+	pBrd->Draw( gfx );
 }

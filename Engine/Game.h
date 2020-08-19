@@ -23,6 +23,9 @@
 #include "Keyboard.h"
 #include "Mouse.h"
 #include "Graphics.h"
+#include "Board.h"
+#include "FrameTimer.h"
+#include <memory>
 
 class Game
 {
@@ -42,5 +45,9 @@ private:
 	Graphics gfx;
 	/********************************/
 	/*  User Variables              */
+	FrameTimer ft;
+	static constexpr float stepTime = 1.0f; ///< Set game step time to 1 second
+	float elapsedTime = 0.0f;
+	std::unique_ptr<Board> pBrd;
 	/********************************/
 };
