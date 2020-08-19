@@ -28,6 +28,10 @@ Board::Board( const std::vector<Vei2> gridPos )
 	// Initializing living cells
 	for ( const auto& gp : gridPos )
 	{
+		assert( gp.x >= 0 );
+		assert( gp.x < width );
+		assert( gp.y >= 0 );
+		assert( gp.y < height );
 		// Make sure we're not toggling the same cell twice
 		// if can't find the cell -> wrong coordinates, do nothing
 		if ( auto target = grid.find( gp ); 
@@ -89,6 +93,7 @@ int Board::CountAliveNeighbors( const Vei2& gridPos ) const
 		for ( int x = std::max( 0,gridPos.x - 1 ); x <= std::min( width - 1,gridPos.x + 1 ); ++x )
 		{
 			Vei2 target = { x,y };
+			assert( GetRect().Contains( target ) );
 			if ( target != gridPos )
 			{
 				count += grid.find(target)->second.IsAlive();
@@ -100,6 +105,11 @@ int Board::CountAliveNeighbors( const Vei2& gridPos ) const
 
 Vei2 Board::GridToScreen( const Vei2& gridPos ) const
 {
+	assert( gridPos.x >= 0 );
+	assert( gridPos.x < width );
+	assert( gridPos.y >= 0 );
+	assert( gridPos.y < height );
+
 	return Vei2{
 		topLeft.x + gridPos.x * Cell::size,
 		topLeft.y + gridPos.y * Cell::size
@@ -108,6 +118,8 @@ Vei2 Board::GridToScreen( const Vei2& gridPos ) const
 
 Vei2 Board::ScreenToGrid( const Vei2& screenPos ) const
 {
+	assert( GetRect().Contains( screenPos ) );
+
 	return Vei2{
 		( screenPos.x - topLeft.x ) / Cell::size,
 		( screenPos.y - topLeft.y ) / Cell::size

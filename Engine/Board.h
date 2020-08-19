@@ -24,7 +24,7 @@ private:
 	private:
 		State state = State::Dead;
 	public:
-		static constexpr int size = 6;
+		static constexpr int size = 5;
 	};
 public:
 	/// <summary>
@@ -51,10 +51,27 @@ private:
 
 private:
 	static constexpr Vei2 topLeft = { };
-	static constexpr int width = 100;
-	static constexpr int height = 60;
+	static constexpr int width = Graphics::ScreenWidth / Cell::size;
+	static constexpr int height = Graphics::ScreenHeight / Cell::size;
 	std::unordered_map<Vei2,Cell> grid;
 
 	std::queue<Vei2> upForToggling;
+public:
+	static constexpr int GetWidth()
+	{
+		return width;
+	}
+	static constexpr int GetHeight()
+	{
+		return height;
+	}
+	static RectI GetRect()
+	{
+		return RectI{
+			topLeft,
+			width * Cell::size,
+			height * Cell::size
+		};
+	}
 };
 

@@ -30,8 +30,8 @@ Game::Game( MainWindow& wnd )
 	gfx( wnd )
 {
 	std::mt19937 rng( std::random_device{}() );
-	std::uniform_int_distribution<int> xDist( 0,99 );
-	std::uniform_int_distribution<int> yDist( 0,59 );
+	std::uniform_int_distribution<int> xDist( 0,Board::GetWidth() - 1 );
+	std::uniform_int_distribution<int> yDist( 0,Board::GetHeight() - 1 );
 
 	std::vector<Vei2> pos;
 	for ( int i = 0; i < 500; ++i )
