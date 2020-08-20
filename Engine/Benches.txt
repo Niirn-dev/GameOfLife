@@ -1,16 +1,16 @@
-Initial -- 0.5 step -- Debug
+Initial -- 0.5 step -- 1000 cells start -- Debug
 Sample size:10
 Min:	865.279ms
 Max:	880.257ms
 Mean:	873.234ms
 
-Initial -- 0.5 step -- Release
+Initial -- 0.5 step -- 1000 cells start -- Release
 Sample size:10
 Min:	11.54ms
 Max:	11.7615ms
 Mean:	11.6632ms
 
-
+// Note: for 10 samples the second printed result is recorded
 Iterate only over alive cells -- 0.5 step -- 5000 cells start -- Debug
 Sample size:10
 Min:	634.425ms
@@ -43,3 +43,24 @@ Sample size:50
 Min:	1.0764ms
 Max:	4.8524ms
 Mean:	1.09272ms
+
+
+Sort and remove duplicates instead of having a look up map -- 0.5 step -- 5000 cells start -- Debug
+Sample size:10
+Min:	221.389ms
+Max:	269.598ms
+Mean:	223.782ms
+Sample size:50
+Min:	164.364ms
+Max:	406.513ms
+Mean:	165.835ms
+
+Sort and remove duplicates instead of having a look up map -- 0.5 step -- 5000 cells start -- Release
+Sample size:10
+Min:	0.6064ms
+Max:	0.7681ms
+Mean:	0.649311ms
+Sample size:50
+Min:	0.4633ms
+Max:	1.3006ms
+Mean:	0.543184ms

@@ -38,6 +38,10 @@ Game::Game( MainWindow& wnd )
 	{
 		pos.emplace_back( xDist( rng ),yDist( rng ) );
 	}
+	//for ( int i = 0; i < 3; ++i )
+	//{
+	//	pos.emplace_back( 5 + i,5 );
+	//}
 	pBrd = std::make_unique<Board>( pos );
 }
 

@@ -41,8 +41,7 @@ private:
 	std::vector<bool> grid;
 
 	std::vector<Vei2> aliveCellsPos;
-	std::unordered_map<Vei2,bool> wasChecked;
-	std::queue< std::pair<Vei2,bool> > changedStates;
+	std::vector< std::pair<Vei2,bool> > changedStates;
 public:
 	static constexpr int GetWidth()
 	{

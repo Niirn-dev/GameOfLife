@@ -42,13 +42,11 @@ void Board::Update()
 						assert( GetRect().Contains( target ) );
 						// Make sure the cell is dead and wasn't checked yet
 						// This works because the wasChecked map is cleared every generation
-						if ( !grid[GridToIndex( target )] &&
-							 ( wasChecked.find( target ) == wasChecked.end() ) )
+						if ( !grid[GridToIndex( target )] )
 						{
-							wasChecked[target] = true;
 							if ( CountAliveNeighbors( target ) == 3 )
 							{
-								changedStates.push( std::pair<Vei2,bool>( target,true ) );
+								changedStates.push_back( std::pair<Vei2,bool>( target,true ) );
 							}
 						}
 					}
@@ -57,7 +55,7 @@ void Board::Update()
 				// Figure out if the cell dies in the next generation
 				if ( int neighbs = CountAliveNeighbors( pos ); neighbs < 2 || neighbs > 3 )
 				{
-					changedStates.push( std::pair<Vei2,bool>( pos,false ) );
+					changedStates.push_back( std::pair<Vei2,bool>( pos,false ) );
 					// Don't copy if it's gonna be dead
 					return false;
 				}
@@ -68,17 +66,28 @@ void Board::Update()
 		aliveCellsPos = std::move( aliveNextGen );
 	}
 
-	// Toggle states for all marked cells and cleanup
-	for ( ; !changedStates.empty(); changedStates.pop() )
 	{
-		grid[GridToIndex( changedStates.front().first )] = changedStates.front().second;
+		// Remove duplicates from changedStates buffer
+		std::sort( changedStates.begin(),changedStates.end(),
+				   [this]( const std::pair<Vei2,bool>& a,const std::pair<Vei2,bool>& b )
+				   {
+					   return GridToIndex( a.first ) < GridToIndex( b.first );
+				   } );
+		auto new_end = std::unique( changedStates.begin(),changedStates.end() );
+		changedStates.erase( new_end,changedStates.end() );
+	}
+
+	// Toggle states for all marked cells and cleanup
+	for ( const auto& p : changedStates )
+	{
+		grid[GridToIndex( p.first )] = p.second;
 		// Add new alive cells to the vector
-		if ( changedStates.front().second )
+		if ( p.second )
 		{
-			aliveCellsPos.push_back( changedStates.front().first );
+			aliveCellsPos.push_back( p.first );
 		}
 	}
-	wasChecked.clear();
+	changedStates.clear();
 }
 
 void Board::Draw( Graphics& gfx ) const
