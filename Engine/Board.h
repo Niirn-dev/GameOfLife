@@ -5,6 +5,7 @@
 #include <vector>
 #include <queue>
 #include <unordered_map>
+#include <unordered_set>
 
 class Board
 {
@@ -41,7 +42,6 @@ private:
 	std::vector<bool> grid;
 
 	std::vector<Vei2> aliveCellsPos;
-	std::vector< std::pair<Vei2,bool> > changedStates;
 public:
 	static constexpr int GetWidth()
 	{
