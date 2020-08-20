@@ -51,7 +51,7 @@ public:
 private:
 	FrameTimer ft;
 	int		count		= 0;
-	int		nSamples	= 10;
+	int		nSamples	= 50;
 	float	min			= std::numeric_limits<float>::max();
 	float	max			= 0.0f;
 	float	mean		= 0.0f;

@@ -23,15 +23,23 @@ Min:	13.6025ms
 Max:	15.5977ms
 Mean:	13.768ms
 
-
+// Time drops quite a bit on bigger sample size 'cuz many cells die early
 Use vector for grid and bool for cells -- 0.5 step -- 5000 cells start -- Debug
 Sample size:10
 Min:	189.727ms
 Max:	221.539ms
 Mean:	192.77ms
+Sample size:50
+Min:	135.314ms
+Max:	443.177ms
+Mean:	136.777ms
 
 Use vector for grid and bool for cells -- 0.5 step -- 5000 cells start -- Release
 Sample size:10
 Min:	1.8157ms
 Max:	2.1961ms
 Mean:	1.91522ms
+Sample size:50
+Min:	1.0764ms
+Max:	4.8524ms
+Mean:	1.09272ms
