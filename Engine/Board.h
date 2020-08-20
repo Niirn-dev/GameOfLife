@@ -8,25 +8,6 @@
 
 class Board
 {
-private:
-	class Cell
-	{
-	public:
-		enum class State
-		{
-			Dead,
-			Alive
-		};
-		Cell() = default;
-		Cell( State s );
-		bool IsAlive() const;
-		void ToggleState();
-
-	private:
-		State state = State::Dead;
-	public:
-		static constexpr int size = 5;
-	};
 public:
 	/// <summary>
 	/// Constructs the board with the defined alive cells
@@ -48,17 +29,20 @@ private:
 	Vei2 GridToScreen( const Vei2& gridPos ) const;
 	Vei2 ScreenToGrid( const Vei2& screenPos ) const;
 
+	size_t GridToIndex( const Vei2& gridPos ) const;
+
 	RectI GetCellRect( const Vei2& gridPos ) const;
 
 private:
 	static constexpr Vei2 topLeft = { };
-	static constexpr int width = Graphics::ScreenWidth / Cell::size;
-	static constexpr int height = Graphics::ScreenHeight / Cell::size;
-	std::unordered_map<Vei2,Cell> grid;
+	static constexpr int cellSize = 5;
+	static constexpr int width = Graphics::ScreenWidth / cellSize;
+	static constexpr int height = Graphics::ScreenHeight / cellSize;
+	std::vector<bool> grid;
 
 	std::vector<Vei2> aliveCellsPos;
 	std::unordered_map<Vei2,bool> wasChecked;
-	std::queue<Vei2> upForToggling;
+	std::queue< std::pair<Vei2,bool> > changedStates;
 public:
 	static constexpr int GetWidth()
 	{
@@ -72,8 +56,8 @@ public:
 	{
 		return RectI{
 			topLeft,
-			width * Cell::size,
-			height * Cell::size
+			width * cellSize,
+			height * cellSize
 		};
 	}
 };

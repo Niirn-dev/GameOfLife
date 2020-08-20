@@ -10,6 +10,7 @@ Min:	11.54ms
 Max:	11.7615ms
 Mean:	11.6632ms
 
+
 Iterate only over alive cells -- 0.5 step -- 5000 cells start -- Debug
 Sample size:10
 Min:	634.425ms
@@ -23,3 +24,14 @@ Max:	15.5977ms
 Mean:	13.768ms
 
 
+Use vector for grid and bool for cells -- 0.5 step -- 5000 cells start -- Debug
+Sample size:10
+Min:	189.727ms
+Max:	221.539ms
+Mean:	192.77ms
+
+Use vector for grid and bool for cells -- 0.5 step -- 5000 cells start -- Release
+Sample size:10
+Min:	1.8157ms
+Max:	2.1961ms
+Mean:	1.91522ms

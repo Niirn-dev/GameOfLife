@@ -3,35 +3,10 @@
 #include <algorithm>
 #include <iterator>
 
-Board::Cell::Cell( State s )
-	:
-	state( s )
-{
-}
-
-bool Board::Cell::IsAlive() const
-{
-	return state == State::Alive;
-}
-
-void Board::Cell::ToggleState()
-{
-	state = (State)( (int)state ^ (int)State::Alive );
-}
-
 Board::Board( const std::vector<Vei2> gridPos )
 	:
 	grid( width * height )
 {
-	// Initialize entire map?
-	for ( Vei2 gp = { 0,0 }; gp.y < height; ++gp.y )
-	{
-		for ( gp.x = 0; gp.x < width; ++gp.x )
-		{
-			grid[gp] = Cell( Cell::State::Dead );
-		}
-	}
-
 	// Initializing living cells
 	for ( const auto& gp : gridPos )
 	{
@@ -40,9 +15,9 @@ Board::Board( const std::vector<Vei2> gridPos )
 		assert( gp.y >= 0 );
 		assert( gp.y < height );
 		// Make sure we're not toggling the same cell twice
-		if ( !grid[gp].IsAlive() )
+		if ( !grid[GridToIndex( gp )] )
 		{
-			grid[gp] = Cell( Cell::State::Alive );
+			grid[GridToIndex( gp )] = true;
 			aliveCellsPos.push_back( gp );
 		}
 	}
@@ -67,22 +42,22 @@ void Board::Update()
 						assert( GetRect().Contains( target ) );
 						// Make sure the cell is dead and wasn't checked yet
 						// This works because the wasChecked map is cleared every generation
-						if ( !grid[target].IsAlive() &&
+						if ( !grid[GridToIndex( target )] &&
 							 ( wasChecked.find( target ) == wasChecked.end() ) )
 						{
 							wasChecked[target] = true;
 							if ( CountAliveNeighbors( target ) == 3 )
 							{
-								upForToggling.push( target );
+								changedStates.push( std::pair<Vei2,bool>( target,true ) );
 							}
 						}
 					}
 				}
 
-				// Figure out the state of this cell in the next generation
+				// Figure out if the cell dies in the next generation
 				if ( int neighbs = CountAliveNeighbors( pos ); neighbs < 2 || neighbs > 3 )
 				{
-					upForToggling.push( pos );
+					changedStates.push( std::pair<Vei2,bool>( pos,false ) );
 					// Don't copy if it's gonna be dead
 					return false;
 				}
@@ -94,13 +69,13 @@ void Board::Update()
 	}
 
 	// Toggle states for all marked cells and cleanup
-	for ( ; !upForToggling.empty(); upForToggling.pop() )
+	for ( ; !changedStates.empty(); changedStates.pop() )
 	{
-		grid[upForToggling.front()].ToggleState();
+		grid[GridToIndex( changedStates.front().first )] = changedStates.front().second;
 		// Add new alive cells to the vector
-		if ( grid[upForToggling.front()].IsAlive() )
+		if ( changedStates.front().second )
 		{
-			aliveCellsPos.push_back( upForToggling.front() );
+			aliveCellsPos.push_back( changedStates.front().first );
 		}
 	}
 	wasChecked.clear();
@@ -126,7 +101,7 @@ int Board::CountAliveNeighbors( const Vei2& gridPos ) const
 			assert( GetRect().Contains( target ) );
 			if ( target != gridPos )
 			{
-				count += grid.find(target)->second.IsAlive();
+				count += grid[GridToIndex( target )];
 			}
 		}
 	}
@@ -141,8 +116,8 @@ Vei2 Board::GridToScreen( const Vei2& gridPos ) const
 	assert( gridPos.y < height );
 
 	return Vei2{
-		topLeft.x + gridPos.x * Cell::size,
-		topLeft.y + gridPos.y * Cell::size
+		topLeft.x + gridPos.x * cellSize,
+		topLeft.y + gridPos.y * cellSize
 	};;
 }
 
@@ -151,16 +126,21 @@ Vei2 Board::ScreenToGrid( const Vei2& screenPos ) const
 	assert( GetRect().Contains( screenPos ) );
 
 	return Vei2{
-		( screenPos.x - topLeft.x ) / Cell::size,
-		( screenPos.y - topLeft.y ) / Cell::size
+		( screenPos.x - topLeft.x ) / cellSize,
+		( screenPos.y - topLeft.y ) / cellSize
 	};
+}
+
+size_t Board::GridToIndex( const Vei2& gridPos ) const
+{
+	return (size_t)gridPos.y * width + gridPos.x;
 }
 
 RectI Board::GetCellRect( const Vei2& gridPos ) const
 {
 	return RectI{
 		GridToScreen( gridPos ),
-		Cell::size,
-		Cell::size
+		cellSize,
+		cellSize
 	};
 }
