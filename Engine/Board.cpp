@@ -3,6 +3,12 @@
 #include <algorithm>
 #include <iterator>
 
+Board::Board()
+	:
+	grid( width * height )
+{
+}
+
 Board::Board( const std::vector<Vei2> gridPos )
 	:
 	grid( width * height )
@@ -79,12 +85,35 @@ void Board::Update()
 	}
 }
 
-void Board::Draw( Graphics& gfx ) const
+void Board::Draw( Graphics& gfx,Color c ) const
 {
 	// Iterate over alive cells
 	for ( auto& pos : aliveCellsPos )
 	{
-		gfx.DrawRect( GetCellRect( pos ),Colors::White );
+		gfx.DrawRect( GetCellRect( pos ),c );
+	}
+}
+
+void Board::ToggleCellState( const Vei2& screenPos )
+{
+	const auto gridPos = ScreenToGrid( screenPos );
+
+	grid[GridToIndex( gridPos )] = !grid[GridToIndex( gridPos )];
+	if ( grid[GridToIndex( gridPos )] )
+	{
+		aliveCellsPos.push_back( gridPos );
+	}
+	else
+	{
+		auto new_end = std::remove_if(
+			aliveCellsPos.begin(),
+			aliveCellsPos.end(),
+			[&gridPos]( const Vei2& pos ) 
+			{
+				return pos == gridPos;
+			}
+		);
+		aliveCellsPos.erase( new_end,aliveCellsPos.end() );
 	}
 }
 

@@ -51,5 +51,6 @@ private:
 	static constexpr float stepTime = 0.5f; ///< Set game step time to 1 second
 	float elapsedTime = 0.0f;
 	std::unique_ptr<Board> pBrd;
+	bool isSimulationPaused = true;
 	/********************************/
 };

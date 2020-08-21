@@ -11,6 +11,10 @@ class Board
 {
 public:
 	/// <summary>
+	/// Default constructor for an empty board
+	/// </summary>
+	Board();
+	/// <summary>
 	/// Constructs the board with the defined alive cells
 	/// </summary>
 	/// <param name="pos"> grid positions of the alive cells </param>
@@ -22,8 +26,11 @@ public:
 	/// <summary>
 	/// Draws all living cells to the screen
 	/// </summary>
-	/// <param name="gfx"></param>
-	void Draw( Graphics& gfx ) const;
+	/// <param name="gfx">reference of a graphics object</param>
+	/// /// <param name="c">color of the alive cells</param>
+	void Draw( Graphics& gfx,Color c ) const;
+
+	void ToggleCellState( const Vei2& screenPos );
 
 private:
 	int CountAliveNeighbors( const Vei2& gridPos ) const;

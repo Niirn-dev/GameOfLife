@@ -27,22 +27,9 @@
 Game::Game( MainWindow& wnd )
 	:
 	wnd( wnd ),
-	gfx( wnd )
+	gfx( wnd ),
+	pBrd( std::make_unique<Board>() )
 {
-	std::mt19937 rng( std::random_device{}() );
-	std::uniform_int_distribution<int> xDist( 0,Board::GetWidth() - 1 );
-	std::uniform_int_distribution<int> yDist( 0,Board::GetHeight() - 1 );
-
-	std::vector<Vei2> pos;
-	for ( int i = 0; i < 5000; ++i )
-	{
-		pos.emplace_back( xDist( rng ),yDist( rng ) );
-	}
-	//for ( int i = 0; i < 3; ++i )
-	//{
-	//	pos.emplace_back( 5 + i,5 );
-	//}
-	pBrd = std::make_unique<Board>( pos );
 }
 
 void Game::Go()
@@ -55,23 +42,67 @@ void Game::Go()
 
 void Game::UpdateModel()
 {
-	elapsedTime += ft.Mark();
-	while ( elapsedTime >= stepTime )
+	const float dt = ft.Mark();
+	// Manage player keyboard
+	while ( !wnd.kbd.KeyIsEmpty() )
 	{
-		b.Start();
-
-		pBrd->Update();
-
-		if ( b.End() )
+		auto e = wnd.kbd.ReadKey();
+		if ( e.IsPress() )
 		{
-			OutputDebugStringW( ( (std::wstring)b ).c_str() );
+			switch ( e.GetCode() )
+			{
+			case VK_SPACE:
+				isSimulationPaused = !isSimulationPaused;
+				break;
+			case 'R':
+				pBrd.reset();
+				pBrd = std::make_unique<Board>();
+				isSimulationPaused = true;
+				break;
+			default:
+				break;
+			}
 		}
+	}
 
-		elapsedTime -= stepTime;
+	if ( !isSimulationPaused )
+	{
+		elapsedTime += dt;
+		while ( elapsedTime >= stepTime )
+		{
+			pBrd->Update();
+
+			elapsedTime -= stepTime;
+		}
+	}
+	else
+	{
+		// Manage player mouse inputs while paused
+		// Process events one at a time
+		while ( !wnd.mouse.IsEmpty() )
+		{
+			auto e = wnd.mouse.Read();
+			if ( e.GetType() == Mouse::Event::Type::LPress )
+			{
+				pBrd->ToggleCellState( e.GetPos() );
+			}
+		}
+		// Machine gun events
+		if ( wnd.mouse.RightIsPressed() )
+		{
+			pBrd->ToggleCellState( wnd.mouse.GetPos() );
+		}
 	}
 }
 
 void Game::ComposeFrame()
 {
-	pBrd->Draw( gfx );
+	if ( !isSimulationPaused )
+	{
+		pBrd->Draw( gfx,Colors::White );
+	}
+	else
+	{
+		pBrd->Draw( gfx,{ 225,180,225 } );
+	}
 }
