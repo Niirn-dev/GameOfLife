@@ -64,3 +64,46 @@ Sample size:50
 Min:	0.4633ms
 Max:	1.3006ms
 Mean:	0.543184ms
+
+
+Use set for changed cells buffer -- 0.5 step -- 5000 cells start -- Debug
+Sample size:10
+Min:	219.059ms
+Max:	266.579ms
+Mean:	222.24ms
+Sample size:50
+Min:	133.046ms
+Max:	401.205ms
+Mean:	134.876ms
+
+Use set for changed cells buffer -- 0.5 step -- 5000 cells start -- Release
+Sample size:10
+Min:	0.7363ms
+Max:	0.8911ms
+Mean:	0.743818ms
+Sample size:50
+Min:	0.4945ms
+Max:	1.6158ms
+Mean:	0.50719ms
+
+
+Made changed cells buffer local -- 0.5 step -- 5000 cells start -- Debug
+Sample size:10
+Min:	213.642ms
+Max:	246.285ms
+Mean:	217.679ms
+Sample size:50
+Min:	172.321ms
+Max:	400.449ms
+Mean:	178.838ms
+
+Made changed cells buffer local -- 0.5 step -- 5000 cells start -- Release
+Sample size:10
+Min:	0.6646ms
+Max:	0.9074ms
+Mean:	0.739194ms
+Sample size:50
+Min:	0.5912ms
+Max:	1.4804ms
+Mean:	0.65395ms
+

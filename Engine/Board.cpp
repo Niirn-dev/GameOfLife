@@ -25,6 +25,7 @@ Board::Board( const std::vector<Vei2> gridPos )
 
 void Board::Update()
 {
+	std::unordered_set<Vei2> changedStates;
 	// Mark cells that are up for toggling
 	{
 		std::vector<Vei2> aliveNextGen;
@@ -40,13 +41,13 @@ void Board::Update()
 					{
 						Vei2 target = { x,y };
 						assert( GetRect().Contains( target ) );
-						// Make sure the cell is dead and wasn't checked yet
+						// Make sure the cell is dead
 						// This works because the wasChecked map is cleared every generation
 						if ( !grid[GridToIndex( target )] )
 						{
 							if ( CountAliveNeighbors( target ) == 3 )
 							{
-								changedStates.push_back( std::pair<Vei2,bool>( target,true ) );
+								changedStates.insert( target );
 							}
 						}
 					}
@@ -55,7 +56,7 @@ void Board::Update()
 				// Figure out if the cell dies in the next generation
 				if ( int neighbs = CountAliveNeighbors( pos ); neighbs < 2 || neighbs > 3 )
 				{
-					changedStates.push_back( std::pair<Vei2,bool>( pos,false ) );
+					changedStates.insert( pos );
 					// Don't copy if it's gonna be dead
 					return false;
 				}
@@ -66,28 +67,16 @@ void Board::Update()
 		aliveCellsPos = std::move( aliveNextGen );
 	}
 
-	{
-		// Remove duplicates from changedStates buffer
-		std::sort( changedStates.begin(),changedStates.end(),
-				   [this]( const std::pair<Vei2,bool>& a,const std::pair<Vei2,bool>& b )
-				   {
-					   return GridToIndex( a.first ) < GridToIndex( b.first );
-				   } );
-		auto new_end = std::unique( changedStates.begin(),changedStates.end() );
-		changedStates.erase( new_end,changedStates.end() );
-	}
-
 	// Toggle states for all marked cells and cleanup
-	for ( const auto& p : changedStates )
+	for ( const auto& pos : changedStates )
 	{
-		grid[GridToIndex( p.first )] = p.second;
+		grid[GridToIndex( pos )] = !grid[GridToIndex( pos )];
 		// Add new alive cells to the vector
-		if ( p.second )
+		if ( grid[GridToIndex( pos )] )
 		{
-			aliveCellsPos.push_back( p.first );
+			aliveCellsPos.push_back( pos );
 		}
 	}
-	changedStates.clear();
 }
 
 void Board::Draw( Graphics& gfx ) const
