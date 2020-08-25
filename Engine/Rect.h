@@ -2,6 +2,10 @@
 
 #include "Vec2.h"
 
+/// <summary>
+/// Rectagle in math axis ( y positive direction is up )
+/// </summary>
+/// <typeparam name="T"></typeparam>
 template <typename T>
 class Rect_
 {
@@ -15,14 +19,14 @@ public:
 		bottom( bottom )
 	{
 	}
-	Rect_( const Vec2_<T>& topLeft,const Vec2_<T> bottomRight )
+	Rect_( const Vec2_<T>& bottomLeft,const Vec2_<T> topRight )
 		:
-		Rect_( topLeft,bottomRight.x - topLeft.x,bottomRight.y - topLeft.y )
+		Rect_( bottomLeft,topRight.x - bottomLeft.x,topRight.y - bottomLeft.y )
 	{
 	}
-	Rect_( const Vec2_<T>& topLeft,T width,T height )
+	Rect_( const Vec2_<T>& bottomLeft,T width,T height )
 		:
-		Rect_( topLeft.x,topLeft.x + width,topLeft.y,topLeft.y + height )
+		Rect_( bottomLeft.x,bottomLeft.x + width,bottomLeft.y + height,bottomLeft.y )
 	{
 	}
 	template<typename T2>
@@ -38,22 +42,22 @@ public:
 	}
 	Rect_ GetExpanded( T offset ) const
 	{
-		return Rect_( left - offset,right + offset,top - offset,bottom + offset );
+		return Rect_( left - offset,right + offset,top + offset,bottom - offset );
 	}
 
 	inline bool IsOverlappingWith( const Rect_& other ) const
 	{
 		return right > other.left && left < other.right && 
-			bottom > other.top && top < other.bottom;
+			bottom < other.top && top > other.bottom;
 	}
 	inline bool IsContainedBy( const Rect_& other ) const
 	{
 		return left >= other.left && right <= other.right &&
-			top >= other.top && bottom <= other.bottom;
+			top <= other.top && bottom >= other.bottom;
 	}
 	inline bool Contains( const Vec2_<T>& point ) const
 	{
-		return point.x >= left && point.x < right&& point.y >= top && point.y < bottom;
+		return point.x >= left && point.x <= right && point.y >= bottom && point.y <= top;
 	}
 
 	void Translate( const Vec2_<T>& offset )
@@ -88,7 +92,7 @@ public:
 	}
 	inline T GetHeight() const
 	{
-		return bottom - top;
+		return top - bottom;
 	}
 
 public:

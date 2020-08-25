@@ -352,16 +352,25 @@ void Graphics::DrawLine( Vec2 p0,Vec2 p1,Color c )
 	}
 }
 
-void Graphics::DrawRect( const RectI& rect,Color c )
+void Graphics::DrawRect( float left,float right,float top,float bottom,Color c )
 {
-	const int xStart = std::max( 0,std::min( rect.left,rect.right ) );
-	const int xEnd = std::min( Graphics::ScreenWidth - 1,std::max( rect.left,rect.right ) );
-	const int yStart = std::max( 0,std::min( rect.top,rect.bottom ) );
-	const int yEnd = std::min( Graphics::ScreenHeight - 1,std::max( rect.top,rect.bottom ) );
-
-	for ( int y = yStart; y <= yEnd; ++y )
+	if ( left > right )
 	{
-		for ( int x = xStart; x <= xEnd; ++x )
+		std::swap( left,right );
+	}
+	if ( top > bottom )
+	{
+		std::swap( top,bottom );
+	}
+
+	left = std::max( 0.0f,left );
+	right = std::min( float( Graphics::ScreenWidth - 1 ),right );
+	top = std::max( 0.0f,top );
+	bottom = std::min( float( Graphics::ScreenHeight - 1 ),bottom );
+
+	for ( int y = (int)top; y <= (int)bottom; ++y )
+	{
+		for ( int x = (int)left; x <= (int)right; ++x )
 		{
 			PutPixel( x,y,c );
 		}

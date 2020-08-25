@@ -61,7 +61,7 @@ public:
 	void PutPixel( int x,int y,Color c );
 	Color GetPixel( int x,int y ) const;
 	void DrawLine( Vec2 p0,Vec2 p1,Color c );
-	void DrawRect( const RectI& rect,Color c );
+	void DrawRect( float left,float right,float top,float bottom,Color c );
 
 	~Graphics();
 private:

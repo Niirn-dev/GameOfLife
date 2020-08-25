@@ -31,7 +31,6 @@ Game::Game( MainWindow& wnd )
 	ct( gfx ),
 	cam( ct ),
 	mcc( wnd.mouse,cam ),
-	pBrd( std::make_unique<Board>() ),
 	rect( 0.0f,50.0f,0.0f,50.0f )
 {
 }
@@ -39,7 +38,7 @@ Game::Game( MainWindow& wnd )
 void Game::Go()
 {
 	gfx.BeginFrame();	
-	// UpdateModel();
+	UpdateModel();
 	ComposeFrame();
 	gfx.EndFrame();
 }
@@ -47,71 +46,11 @@ void Game::Go()
 void Game::UpdateModel()
 {
 	const float dt = ft.Mark();
-	// Manage player keyboard
-	while ( !wnd.kbd.KeyIsEmpty() )
-	{
-		auto e = wnd.kbd.ReadKey();
-		if ( e.IsPress() )
-		{
-			switch ( e.GetCode() )
-			{
-			case VK_SPACE:
-				isSimulationPaused = !isSimulationPaused;
-				break;
-			case 'R':
-				pBrd.reset();
-				pBrd = std::make_unique<Board>();
-				isSimulationPaused = true;
-				break;
-			default:
-				break;
-			}
-		}
-	}
-
-	if ( !isSimulationPaused )
-	{
-		elapsedTime += dt;
-		while ( elapsedTime >= stepTime )
-		{
-			pBrd->Update();
-
-			elapsedTime -= stepTime;
-		}
-	}
-	else
-	{
-		// Manage player mouse inputs while paused
-		// Process events one at a time
-		while ( !wnd.mouse.IsEmpty() )
-		{
-			auto e = wnd.mouse.Read();
-			if ( e.GetType() == Mouse::Event::Type::LPress )
-			{
-				pBrd->ToggleCellState( e.GetPos() );
-			}
-		}
-		// Machine gun events
-		if ( wnd.mouse.RightIsPressed() )
-		{
-			pBrd->ToggleCellState( wnd.mouse.GetPos() );
-		}
-	}
+	mcc.Update();
+	
 }
 
 void Game::ComposeFrame()
 {
-	/*
-	if ( !isSimulationPaused )
-	{
-		pBrd->Draw( gfx,Colors::White );
-	}
-	else
-	{
-		pBrd->Draw( gfx,{ 225,180,225 } );
-	}
-	*/
-	mcc.Update(); ///< Move late to UpdateModel()
-
 	cam.DrawRect( rect,Colors::White );
 }
