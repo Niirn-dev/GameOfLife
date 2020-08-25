@@ -28,6 +28,8 @@
 #include "Bencher.h"
 #include <memory>
 #include "CoordinatesTransformer.h"
+#include "Camera.h"
+#include "MouseCameraController.h"
 
 class Game
 {
@@ -49,6 +51,8 @@ private:
 	/*  User Variables              */
 	FrameTimer ft;
 	CoordinatesTransformer ct;
+	Camera cam;
+	MouseCameraController mcc;
 	Bencher b;
 	static constexpr float stepTime = 0.5f; ///< Set game step time to 1 second
 	float elapsedTime = 0.0f;

@@ -23,6 +23,10 @@ public:
 	{
 	}
 
+	Vec2_ operator-() const
+	{
+		return { -x,-y };
+	}
 	Vec2_  operator+( const Vec2_& rhs ) const
 	{
 		return Vec2_( x + rhs.x,y + rhs.y );
@@ -31,11 +35,11 @@ public:
 	{
 		return *this = *this + rhs;
 	}
-	Vec2_  operator*( float rhs ) const
+	Vec2_  operator*( T rhs ) const
 	{
 		return Vec2_( x * rhs,y * rhs );
 	}
-	Vec2_& operator*=( float rhs )
+	Vec2_& operator*=( T rhs )
 	{
 		return *this = *this * rhs;
 	}
@@ -46,6 +50,14 @@ public:
 	Vec2_& operator-=( const Vec2_& rhs )
 	{
 		return *this = *this - rhs;
+	}
+	Vec2_ operator/( T rhs ) const
+	{
+		return { x / rhs,y / rhs };
+	}
+	Vec2_& operator/=( T rhs )
+	{
+		return *this = *this / rhs;
 	}
 	bool operator==( const Vec2_& rhs ) const
 	{
