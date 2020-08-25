@@ -325,11 +325,43 @@ Color Graphics::GetPixel( int x,int y ) const
 	return pSysBuffer[Graphics::ScreenWidth * y + x];
 }
 
-void Graphics::DrawRect( int x0,int y0,int x1,int y1,Color c )
+void Graphics::DrawLine( Vec2 p0,Vec2 p1,Color c )
 {
-	for ( int y = y0; y < y1; ++y )
+	int steps;
+	float dx = p1.x - p0.x;
+	float dy = p1.y - p0.y;
+	if ( std::abs( dx ) > std::abs( dy ) )
 	{
-		for ( int x = x0; x < x1; ++x )
+		steps = (int)std::abs( dx );
+	}
+	else
+	{
+		steps = (int)std::abs( dy );
+	}
+
+	dx = dx / (float)steps;
+	dy = dy / (float)steps;
+	for ( int i = 0; i < steps; ++i )
+	{
+		const int x = int( p0.x + dx * i );
+		const int y = int( p0.y + dy * i );
+		if ( GetScreenRect().Contains( Vei2{ x,y } ) )
+		{
+			PutPixel( x,y,c );
+		}
+	}
+}
+
+void Graphics::DrawRect( const RectI& rect,Color c )
+{
+	const int xStart = std::max( 0,std::min( rect.left,rect.right ) );
+	const int xEnd = std::min( Graphics::ScreenWidth - 1,std::max( rect.left,rect.right ) );
+	const int yStart = std::max( 0,std::min( rect.top,rect.bottom ) );
+	const int yEnd = std::min( Graphics::ScreenHeight - 1,std::max( rect.top,rect.bottom ) );
+
+	for ( int y = yStart; y <= yEnd; ++y )
+	{
+		for ( int x = xStart; x <= xEnd; ++x )
 		{
 			PutPixel( x,y,c );
 		}

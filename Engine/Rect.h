@@ -25,6 +25,11 @@ public:
 		Rect_( topLeft.x,topLeft.x + width,topLeft.y,topLeft.y + height )
 	{
 	}
+	template<typename T2>
+	explicit operator Rect_<T2>() const
+	{
+		return { T2( left ),T2( right ),T2( top ),T2( bottom ) };
+	}
 
 	static Rect_ FromCenter( const Vec2_<T>& center,T halfWidth,T halfHeight )
 	{
@@ -36,30 +41,52 @@ public:
 		return Rect_( left - offset,right + offset,top - offset,bottom + offset );
 	}
 
-	bool IsOverlappingWith( const Rect_& other ) const
+	inline bool IsOverlappingWith( const Rect_& other ) const
 	{
 		return right > other.left && left < other.right && 
 			bottom > other.top && top < other.bottom;
 	}
-	bool IsContainedBy( const Rect_& other ) const
+	inline bool IsContainedBy( const Rect_& other ) const
 	{
 		return left >= other.left && right <= other.right &&
 			top >= other.top && bottom <= other.bottom;
 	}
-	bool Contains( const Vec2_<T>& point ) const
+	inline bool Contains( const Vec2_<T>& point ) const
 	{
 		return point.x >= left && point.x < right&& point.y >= top && point.y < bottom;
 	}
 
-	Vec2_<T> GetCenter() const
+	void Translate( const Vec2_<T>& offset )
+	{
+		left += offset.x;
+		right += offset.x;
+		top += offset.y;
+		bottom += offset.y;
+	}
+	void Scale( T factor )
+	{
+		left *= factor;
+		right *= factor;
+		top *= factor;
+		bottom *= factor;
+	}
+	void Scale( T factor_x,T factor_y )
+	{
+		left *= factor_x;
+		right *= factor_x;
+		top *= factor_y;
+		bottom *= factor_y;
+	}
+
+	inline Vec2_<T> GetCenter() const
 	{
 		return Vec2_<T>( ( left + right ) / T( 2 ),( top + bottom ) / T( 2 ) );
 	}
-	T GetWidth() const
+	inline T GetWidth() const
 	{
 		return right - left;
 	}
-	T GetHeight() const
+	inline T GetHeight() const
 	{
 		return bottom - top;
 	}

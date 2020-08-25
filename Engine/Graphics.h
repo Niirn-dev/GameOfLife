@@ -60,11 +60,8 @@ public:
 	}
 	void PutPixel( int x,int y,Color c );
 	Color GetPixel( int x,int y ) const;
-	void DrawRect( int x0,int y0,int x1,int y1,Color c );
-	void DrawRect( const RectI& rect,Color c )
-	{
-		DrawRect( rect.left,rect.top,rect.right,rect.bottom,c );
-	}
+	void DrawLine( Vec2 p0,Vec2 p1,Color c );
+	void DrawRect( const RectI& rect,Color c );
 
 	~Graphics();
 private:

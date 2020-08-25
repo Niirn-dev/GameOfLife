@@ -28,14 +28,16 @@ Game::Game( MainWindow& wnd )
 	:
 	wnd( wnd ),
 	gfx( wnd ),
-	pBrd( std::make_unique<Board>() )
+	ct( gfx ),
+	pBrd( std::make_unique<Board>() ),
+	rect( 0.0f,50.0f,0.0f,50.0f )
 {
 }
 
 void Game::Go()
 {
 	gfx.BeginFrame();	
-	UpdateModel();
+	// UpdateModel();
 	ComposeFrame();
 	gfx.EndFrame();
 }
@@ -97,6 +99,7 @@ void Game::UpdateModel()
 
 void Game::ComposeFrame()
 {
+	/*
 	if ( !isSimulationPaused )
 	{
 		pBrd->Draw( gfx,Colors::White );
@@ -105,4 +108,28 @@ void Game::ComposeFrame()
 	{
 		pBrd->Draw( gfx,{ 225,180,225 } );
 	}
+	*/
+	if ( !wnd.kbd.KeyIsEmpty() )
+	{
+		Vec2 offset = { 0.0f,0.0f };
+		if ( wnd.kbd.KeyIsPressed( VK_LEFT ) )
+		{
+			offset.x += -5.0f;
+		}
+		if ( wnd.kbd.KeyIsPressed( VK_RIGHT ) )
+		{
+			offset.x += 5.0f;
+		}
+		if ( wnd.kbd.KeyIsPressed( VK_UP ) )
+		{
+			offset.y += 5.0f;
+		}
+		if ( wnd.kbd.KeyIsPressed( VK_DOWN ) )
+		{
+			offset.y += -5.0f;
+		}
+		rect.Translate( offset );
+	}
+
+	ct.DrawRect( rect,Colors::White );
 }
