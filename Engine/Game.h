@@ -29,6 +29,7 @@
 #include "CoordinatesTransformer.h"
 #include "Camera.h"
 #include "MouseCameraController.h"
+#include "Board.h"
 
 class Game
 {
@@ -55,7 +56,6 @@ private:
 	Bencher b;
 	static constexpr float boardWidth = 800.0f;
 	static constexpr float boardHeight = 600.0f;
-
-	RectF rect;
+	Board brd;
 	/********************************/
 };

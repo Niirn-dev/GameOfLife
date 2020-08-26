@@ -31,7 +31,7 @@ Game::Game( MainWindow& wnd )
 	ct( gfx ),
 	cam( ct ),
 	mcc( wnd.mouse,cam ),
-	rect( 0.0f,50.0f,0.0f,50.0f )
+	brd( boardWidth,boardHeight )
 {
 }
 
@@ -52,5 +52,10 @@ void Game::UpdateModel()
 
 void Game::ComposeFrame()
 {
-	cam.DrawRect( rect,Colors::White );
+	std::vector<Drawable> drawables = std::move( brd.GetDrawables() );
+	for ( auto d : drawables )
+	{
+		cam.Draw( std::move( d ) );
+	}
+	// cam.DrawRect( brd.GetRect(),Colors::White );
 }

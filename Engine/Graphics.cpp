@@ -377,6 +377,15 @@ void Graphics::DrawRect( float left,float right,float top,float bottom,Color c )
 	}
 }
 
+void Graphics::DrawClosedPolyline( const std::vector<Vec2>& verts,Color c )
+{
+	for ( auto vit = verts.begin(); vit != std::prev( verts.end() ); ++vit )
+	{
+		DrawLine( *vit,*std::next( vit ),c );
+	}
+	DrawLine( verts.back(),verts.front(),c );
+}
+
 //////////////////////////////////////////////////
 //           Graphics Exception
 Graphics::Exception::Exception( HRESULT hr,const std::wstring& note,const wchar_t* file,unsigned int line )

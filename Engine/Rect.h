@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Vec2.h"
+#include <vector>
 
 /// <summary>
 /// Rectagle in math axis ( y positive direction is up )
@@ -93,6 +94,15 @@ public:
 	inline T GetHeight() const
 	{
 		return top - bottom;
+	}
+	std::vector<Vec2_<T>> GetVeritices() const
+	{
+		std::vector<Vec2_<T>> verts( 4 );
+		verts.push_back( { left,bottom } );
+		verts.push_back( { left,top } );
+		verts.push_back( { right,top } );
+		verts.push_back( { right,bottom } );
+		return std::move( verts );
 	}
 
 public:
