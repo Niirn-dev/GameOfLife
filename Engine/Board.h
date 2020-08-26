@@ -23,7 +23,7 @@ private:
 
 		void SetScale( float s );
 		float GetScale() const;
-		virtual Drawable GetDrawable() const;
+		Drawable GetDrawable() const;
 		void SetColor( Color c_in );
 		void ToggleState();
 		bool IsAlive() const;

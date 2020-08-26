@@ -26,13 +26,12 @@ Board::Cell::Cell( const Vec2& pos,Color c,std::vector<Vec2> model )
 
 Board::Cell Board::Cell::MakeDefault( const Vec2& pos,Color c )
 {
-	auto rect = RectF( pos - Vec2{ GetRadius(),GetRadius() },pos + Vec2{ GetRadius(),GetRadius() } ).GetExpanded( -1.0f );
 	std::vector<Vec2> model;
 	model.reserve( 4 );
-	model.push_back( { rect.left,rect.bottom } );
-	model.push_back( { rect.left,rect.top } );
-	model.push_back( { rect.right,rect.top } );
-	model.push_back( { rect.right,rect.bottom } );
+	model.push_back( { -radius + 2.0f,-radius + 2.0f } );
+	model.push_back( { -radius + 2.0f,+radius - 2.0f } );
+	model.push_back( { +radius - 2.0f,+radius - 2.0f } );
+	model.push_back( { +radius - 2.0f,-radius + 2.0f } );
 	return std::move( Cell( pos,c,std::move( model ) ) );
 }
 
@@ -50,6 +49,7 @@ Drawable Board::Cell::GetDrawable() const
 {
 	Drawable drawable( model,c,std::move( GetRect() ) );
 	drawable.Scale( scale );
+	drawable.Translate( pos );
 	return std::move( drawable );
 }
 
@@ -70,8 +70,8 @@ Board::Star::Star( const Vec2& pos,Color c,float outerRadius,float radiiRatio,in
 	{
 		const float rad = ( i % 2 == 0 ) ? outerRadius : innerRadius;
 		star.emplace_back(
-			pos.x + rad * cosf( dTheta * float( i ) + angleOffset ),
-			pos.y + rad * sinf( dTheta * float( i ) + angleOffset )
+			rad * cosf( dTheta * float( i ) + angleOffset ),
+			rad * sinf( dTheta * float( i ) + angleOffset )
 		);
 	}
 	SetModel( std::move( star ) );
