@@ -6,11 +6,18 @@ Camera::Camera( CoordinatesTransformer& ct )
 {
 }
 
-void Camera::DrawRect( RectF rect,Color c )
+void Camera::DrawRect( RectF rect,Color c ) const
 {
     rect.Translate( -pos );
     rect.Scale( scale );
     ct.DrawRect( std::move( rect ),c );
+}
+
+void Camera::Draw( Drawable drawable ) const
+{
+    drawable.Translate( -pos );
+    drawable.Scale( scale );
+    ct.Draw( std::move( drawable ) );
 }
 
 void Camera::SetScale( float s )

@@ -13,3 +13,11 @@ void CoordinatesTransformer::DrawRect( RectF rect,Color c ) const
 	rect.Translate( offset );
 	gfx.DrawRect( rect.left,rect.right,rect.top,rect.bottom,c );
 }
+
+void CoordinatesTransformer::Draw( Drawable drawable ) const
+{
+	const Vec2 offset = Vec2{ float( Graphics::ScreenWidth / 2 ),float( Graphics::ScreenHeight / 2 ) };
+	drawable.ScaleIndividually( 1.0f,-1.0f );
+	drawable.Translate( offset );
+	drawable.Render( gfx );
+}

@@ -4,12 +4,15 @@
 #include "Rect.h"
 #include "CoordinatesTransformer.h"
 #include "Mouse.h"
+#include <vector>
+#include "Drawable.h"
 
 class Camera
 {
 public:
 	Camera( CoordinatesTransformer& ct );
-	void DrawRect( RectF rect,Color c );
+	void DrawRect( RectF rect,Color c ) const;
+	void Draw( Drawable drawable ) const;
 
 public:
 	void SetScale( float s );
