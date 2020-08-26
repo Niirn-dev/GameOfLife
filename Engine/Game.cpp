@@ -55,7 +55,10 @@ void Game::ComposeFrame()
 	std::vector<Drawable> drawables = std::move( brd.GetDrawables() );
 	for ( auto d : drawables )
 	{
-		cam.Draw( std::move( d ) );
+		if ( cam.ContainsDrawable( d ) )
+		{
+			cam.Draw( std::move( d ) );
+		}
 	}
 	// cam.DrawRect( brd.GetRect(),Colors::White );
 }

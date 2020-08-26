@@ -14,6 +14,7 @@ public:
 	void Scale( float factor );
 	void ScaleIndividually( float factor_x,float factor_y );
 	void Render( Graphics& gfx );
+	RectF GetRect() const;
 
 private:
 	Color c;

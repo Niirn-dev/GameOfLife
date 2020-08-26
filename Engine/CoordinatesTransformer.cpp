@@ -21,3 +21,9 @@ void CoordinatesTransformer::Draw( Drawable drawable ) const
 	drawable.Translate( offset );
 	drawable.Render( gfx );
 }
+
+RectF CoordinatesTransformer::GetScreenRect() const
+{
+	const Vec2 offset = Vec2{ float( Graphics::ScreenWidth / 2 ),float( Graphics::ScreenHeight / 2 ) };
+	return RectF( -offset,offset );
+}

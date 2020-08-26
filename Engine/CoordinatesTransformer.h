@@ -11,6 +11,7 @@ public:
 	CoordinatesTransformer( Graphics& gfx );
 	void DrawRect( RectF rect,Color c ) const;
 	void Draw( Drawable drawable ) const;
+	RectF GetScreenRect() const;
 
 private:
 	Graphics& gfx;

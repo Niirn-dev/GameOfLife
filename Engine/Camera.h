@@ -20,6 +20,7 @@ public:
 	void SetPosition( const Vec2& pos_in );
 	void MoveBy( const Vec2& offset );
 	const Vec2& GetPosition() const;
+	bool ContainsDrawable( const Drawable& drawable ) const;
 
 private:
 	CoordinatesTransformer& ct;

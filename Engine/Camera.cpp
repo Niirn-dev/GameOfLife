@@ -44,3 +44,12 @@ const Vec2& Camera::GetPosition() const
 {
     return pos;
 }
+
+bool Camera::ContainsDrawable( const Drawable& drawable ) const
+{
+    auto screenRect = ct.GetScreenRect();
+    screenRect.Scale( 1.0f / scale );
+    screenRect.Translate( pos );
+
+    return screenRect.IsOverlappingWith( drawable.GetRect() );
+}

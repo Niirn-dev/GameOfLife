@@ -40,3 +40,8 @@ void Drawable::Render( Graphics& gfx )
 	model.Translate( translation );
 	gfx.DrawRect( model.left,model.right,model.top,model.bottom,c );
 }
+
+RectF Drawable::GetRect() const
+{
+	return model;
+}
