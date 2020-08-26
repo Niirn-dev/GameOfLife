@@ -1,12 +1,39 @@
 #include "Board.h"
 #include <algorithm>
 #include <iterator>
+#include <random>
+#include <cassert>
 
-Board::Cell::Cell( Vec2 pos,Color c )
+Board::Cell::Cell( const Vec2& pos,Color c )
 	:
 	pos( pos ),
 	c( c )
 {
+}
+
+void Board::Cell::SetModel( std::vector<Vec2> model_in )
+{
+	model = std::move( model_in );
+}
+
+Board::Cell::Cell( const Vec2& pos,Color c,std::vector<Vec2> model )
+	:
+	model( std::move( model ) ),
+	pos( pos ),
+	c( c )
+{
+}
+
+Board::Cell Board::Cell::MakeDefault( const Vec2& pos,Color c )
+{
+	auto rect = RectF( pos - Vec2{ GetRadius(),GetRadius() },pos + Vec2{ GetRadius(),GetRadius() } ).GetExpanded( -1.0f );
+	std::vector<Vec2> model;
+	model.reserve( 4 );
+	model.push_back( { rect.left,rect.bottom } );
+	model.push_back( { rect.left,rect.top } );
+	model.push_back( { rect.right,rect.top } );
+	model.push_back( { rect.right,rect.bottom } );
+	return std::move( Cell( pos,c,std::move( model ) ) );
 }
 
 void Board::Cell::SetScale( float s )
@@ -21,10 +48,35 @@ float Board::Cell::GetScale() const
 
 Drawable Board::Cell::GetDrawable() const
 {
-	Drawable drawable( GetRect(),c );
+	Drawable drawable( model,c,std::move( GetRect() ) );
 	drawable.Scale( scale );
 	return std::move( drawable );
 }
+
+Board::Star::Star( const Vec2& pos,Color c,float outerRadius,float radiiRatio,int nFlares,float angleOffset )
+	:
+	Cell( pos,c ),
+	outerRadius( std::min( outerRadius,GetRadius() ) ),
+	innerRadius( outerRadius * std::min( radiiRatio,1.0f / radiiRatio ) ),
+	nFlares( nFlares )
+{
+	assert( angleOffset >= -3.14159f );
+	assert( angleOffset <= 3.14159f );
+
+	std::vector<Vec2> star;
+	star.reserve( 2 * size_t( nFlares ) );
+	const float dTheta = 2.0f * 3.14159f / float( 2 * nFlares );
+	for ( int i = 0; i < 2 * nFlares; ++i )
+	{
+		const float rad = ( i % 2 == 0 ) ? outerRadius : innerRadius;
+		star.emplace_back(
+			pos.x + rad * cosf( dTheta * float( i ) + angleOffset ),
+			pos.y + rad * sinf( dTheta * float( i ) + angleOffset )
+		);
+	}
+	SetModel( std::move( star ) );
+}
+
 
 void Board::Cell::SetColor( Color c_in )
 {
@@ -64,14 +116,28 @@ Board::Board( float width,float height )
 	};
 	const auto nColors = std::end( colors ) - std::begin( colors );
 
+	std::mt19937 rng( std::random_device{}() );
+	std::uniform_int_distribution<int> colorDist( 0,nColors - 1 );
+	std::uniform_real_distribution<float> orDist( minOuterRadius,maxOuterRadius );
+	std::uniform_real_distribution<float> rrDist( minRatio,maxRatio );
+	std::uniform_int_distribution<int> flareDist( minFlares,maxFlares );
+	std::uniform_real_distribution<float> angleDist( minAngle,maxAngle );
+
 	int i = 0;
 	cells.reserve( nCellsAcross * nCellsUp );
 	for ( Vec2 pos = { rect.left + Cell::GetRadius(),rect.bottom + Cell::GetRadius() }; pos.y < rect.top; pos.y += Cell::GetSize() )
 	{
 		for ( pos.x = rect.left + Cell::GetRadius(); pos.x < rect.right; pos.x += Cell::GetSize() )
 		{
-			cells.emplace_back( pos,colors[i % nColors] );
-			cells.back().ToggleState();
+			cells.push_back( std::make_unique<Star>( 
+				pos,
+				colors[colorDist( rng )],
+				orDist( rng ),
+				rrDist( rng ),
+				flareDist( rng ),
+				angleDist( rng )
+			) );
+			cells.back()->ToggleState();
 			++i;
 		}
 	}
@@ -83,9 +149,9 @@ std::vector<Drawable> Board::GetDrawables() const
 
 	for ( const auto& c : cells )
 	{
-		if ( c.IsAlive() )
+		if ( c->IsAlive() )
 		{
-			drawables.push_back( std::move( c.GetDrawable() ) );
+			drawables.push_back( std::move( c->GetDrawable() ) );
 		}
 	}
 

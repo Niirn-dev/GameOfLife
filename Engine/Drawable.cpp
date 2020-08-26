@@ -1,9 +1,10 @@
 #include "Drawable.h"
 
-Drawable::Drawable( RectF model,Color c )
+Drawable::Drawable( std::vector<Vec2> model,Color c,RectF boundRect )
 	:
 	c( c ),
-	model( std::move( model ) )
+	model( std::move( model ) ),
+	boundRect( std::move( boundRect ) )
 {
 }
 
@@ -29,19 +30,19 @@ void Drawable::ScaleIndividually( float factor_x,float factor_y )
 
 void Drawable::Render( Graphics& gfx )
 {
-	/*for ( auto& v : model )
+	for ( auto& v : model )
 	{
 		v.x *= scale_x;
 		v.y *= scale_y;
 		v += translation;
 	}
-	gfx.DrawClosedPolyline( model,c );*/
-	model.Scale( scale_x,scale_y );
+	gfx.DrawClosedPolyline( model,c );
+	/*model.Scale( scale_x,scale_y );
 	model.Translate( translation );
-	gfx.DrawRect( model.left,model.right,model.top,model.bottom,c );
+	gfx.DrawRect( model.left,model.right,model.top,model.bottom,c );*/
 }
 
 RectF Drawable::GetRect() const
 {
-	return model;
+	return boundRect;
 }

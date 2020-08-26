@@ -8,7 +8,7 @@
 class Drawable
 {
 public:
-	Drawable( RectF model,Color c );
+	Drawable( std::vector<Vec2> model,Color c,RectF boundRect );
 
 	void Translate( const Vec2& offset );
 	void Scale( float factor );
@@ -18,7 +18,8 @@ public:
 
 private:
 	Color c;
-	RectF model;
+	std::vector<Vec2> model;
+	RectF boundRect;
 	Vec2 translation = { 0.0f,0.0f };
 	float scale_x = 1.0f;
 	float scale_y = 1.0f;

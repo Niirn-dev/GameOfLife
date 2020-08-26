@@ -54,8 +54,8 @@ private:
 	Camera cam;
 	MouseCameraController mcc;
 	Bencher b;
-	static constexpr float boardWidth = 800.0f;
-	static constexpr float boardHeight = 600.0f;
+	static constexpr float boardWidth = 1600.0f;
+	static constexpr float boardHeight = 1200.0f;
 	Board brd;
 	/********************************/
 };

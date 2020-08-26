@@ -84,6 +84,6 @@ public:
 	static constexpr int ScreenHeight = 600;
 	static RectI GetScreenRect()
 	{
-		return RectI( 0,ScreenWidth,0,ScreenHeight );
+		return RectI( 0,ScreenWidth - 1,ScreenHeight - 1,0 );
 	};
 };
