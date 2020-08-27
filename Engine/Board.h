@@ -92,8 +92,8 @@ private:
 	// Parameters for cell stars generation
 	static constexpr float maxOuterRadius	= 18.0f;
 	static constexpr float minOuterRadius	= 10.0f;
-	static constexpr float maxRatio			= 0.9f;
-	static constexpr float minRatio			= 0.4f;
+	static constexpr float maxRatio			= 0.6f;
+	static constexpr float minRatio			= 0.2f;
 	static constexpr int   maxFlares		= 16;
 	static constexpr int   minFlares		= 3;
 	static constexpr float maxAngle			= 3.14159f;
