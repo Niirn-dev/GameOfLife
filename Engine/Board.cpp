@@ -170,12 +170,24 @@ Board::Board( float width,float height,float stepTime/*= 1.0f*/ )
 			}
 		}
 	}
+
+	GenerateBorderModel();
+}
+
+void Board::GenerateBorderModel()
+{
+	borderModels.resize( borderThickness );
+	for ( int i = 0; i < borderThickness; ++i )
+	{
+		borderModels.reserve( 4 );
+		borderModels[i] = std::move( rect.GetExpanded( float( i + 1 ) ).GetVeritices() );
+	}
 }
 
 void Board::Update( float dt )
 {
 	timeElapsed += dt;
-	while ( timeElapsed >= stepTime )
+	if ( timeElapsed >= stepTime )
 	{
 		assert( changedStates.empty() );
 		// Mark cells that are up for toggling
@@ -270,6 +282,18 @@ std::vector<Drawable> Board::GetDrawables() const
 RectF Board::GetRect() const
 {
 	return rect;
+}
+
+std::vector<Drawable> Board::GetBorderDrawables() const
+{
+	std::vector<Drawable> drawables;
+	drawables.reserve( borderThickness );
+	for ( int i = 0; i < borderThickness; ++i )
+	{
+		drawables.emplace_back( borderModels[i],borderColor,rect );
+	}
+
+	return drawables;
 }
 
 int Board::CountAliveNeighbors( const Cell* target ) const

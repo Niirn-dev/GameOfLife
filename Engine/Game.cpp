@@ -60,4 +60,10 @@ void Game::ComposeFrame()
 			cam.Draw( std::move( d ) );
 		}
 	}
+
+	drawables = std::move( brd.GetBorderDrawables() );
+	for ( auto d : drawables )
+	{
+		cam.Draw( std::move( d ) );
+	}
 }

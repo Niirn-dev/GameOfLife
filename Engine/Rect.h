@@ -97,7 +97,8 @@ public:
 	}
 	std::vector<Vec2_<T>> GetVeritices() const
 	{
-		std::vector<Vec2_<T>> verts( 4 );
+		std::vector<Vec2_<T>> verts;
+		verts.reserve( 4 );
 		verts.push_back( { left,bottom } );
 		verts.push_back( { left,top } );
 		verts.push_back( { right,top } );

@@ -70,10 +70,14 @@ private:
 
 public:
 	Board( float width,float height,float stepTime = 1.0f );
+private:
+	void GenerateBorderModel();
 
+public:
 	void Update( float dt );
 	std::vector<Drawable> GetDrawables() const;
 	RectF GetRect() const;
+	std::vector<Drawable> GetBorderDrawables() const;
 private:
 	int CountAliveNeighbors( const Cell* target ) const;
 	int CellToIndex( const Cell* cp ) const;
@@ -91,6 +95,10 @@ private:
 	std::vector<std::unique_ptr<Cell>> cellPtrs;
 	std::vector<Cell*> aliveCellPtrs; 
 	std::unordered_set<Cell*> changedStates;
+
+	static constexpr int borderThickness = 3;
+	std::vector<std::vector<Vec2>> borderModels;
+	static constexpr Color borderColor = Colors::Gray;
 
 	// Parameters for cell stars generation
 	static constexpr float maxOuterRadius	= 18.0f;
