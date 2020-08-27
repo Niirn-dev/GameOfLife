@@ -3,6 +3,8 @@
 #include <iterator>
 #include <random>
 #include <cassert>
+#include <unordered_set>
+#include <functional>
 
 Board::Cell::Cell( const Vec2& pos,Color c )
 	:
@@ -93,13 +95,19 @@ bool Board::Cell::IsAlive() const
 	return isAlive;
 }
 
+Vec2 Board::Cell::GetPos() const
+{
+	return pos;
+}
+
 RectF Board::Cell::GetRect() const
 {
 	return RectF( pos - Vec2{ GetRadius(),GetRadius() },pos + Vec2{ GetRadius(),GetRadius() } );
 }
 
-Board::Board( float width,float height )
+Board::Board( float width,float height,float stepTime/*= 1.0f*/ )
 	:
+	stepTime( stepTime ),
 	width( width ),
 	height( height ),
 	rect( -width / 2.0f,width / 2.0f,height / 2.0f,-height / 2.0f ),
@@ -123,13 +131,13 @@ Board::Board( float width,float height )
 	std::uniform_int_distribution<int> flareDist( minFlares,maxFlares );
 	std::uniform_real_distribution<float> angleDist( minAngle,maxAngle );
 
-	int i = 0;
-	cells.reserve( nCellsAcross * nCellsUp );
+	std::uniform_int_distribution<int> spawnDist( 0,100 );
+	cellPtrs.reserve( (size_t)nCellsAcross * nCellsUp );
 	for ( Vec2 pos = { rect.left + Cell::GetRadius(),rect.bottom + Cell::GetRadius() }; pos.y < rect.top; pos.y += Cell::GetSize() )
 	{
 		for ( pos.x = rect.left + Cell::GetRadius(); pos.x < rect.right; pos.x += Cell::GetSize() )
 		{
-			cells.push_back( std::make_unique<Star>( 
+			cellPtrs.push_back( std::make_unique<Star>(
 				pos,
 				colors[colorDist( rng )],
 				orDist( rng ),
@@ -137,9 +145,79 @@ Board::Board( float width,float height )
 				flareDist( rng ),
 				angleDist( rng )
 			) );
-			cells.back()->ToggleState();
-			++i;
+			if ( spawnDist( rng ) > 75 )
+			{
+				cellPtrs.back()->ToggleState();
+				aliveCellPtrs.push_back( cellPtrs.back().get() );
+			}
 		}
+	}
+
+	/*CellAt( 10,10 ).ToggleState();
+	aliveCellPtrs.push_back( &CellAt( 10,10 ) );
+	CellAt( 11,10 ).ToggleState();
+	aliveCellPtrs.push_back( &CellAt( 11,10 ) );
+	CellAt( 12,10 ).ToggleState();
+	aliveCellPtrs.push_back( &CellAt( 12,10 ) );*/
+}
+
+void Board::Update( float dt )
+{
+	timeElapsed += dt;
+	while ( timeElapsed >= stepTime )
+	{
+		std::unordered_set<Cell*> changedStates;
+		// Mark cells that are up for toggling
+		std::vector<Cell*> aliveNextGeneration;
+		std::copy_if(
+			aliveCellPtrs.begin(),aliveCellPtrs.end(),
+			std::back_inserter( aliveNextGeneration ),
+			[&]( Cell* pc )
+			{
+				// Get index of the cell
+				const int center = CellToIndex( pc );
+				const int center_y = center / nCellsAcross;
+				const int center_x = center - center_y * nCellsAcross;
+
+				// Figure out the future state of dead neighbors in the next generation
+				for ( auto y = std::max( 0,center_y - 1 ); y <= std::min( (int)nCellsUp - 1,center_y + 1 ); ++y )
+				{
+					for ( auto x = std::max( 0,center_x - 1 ); x <= std::min( (int)nCellsAcross - 1,center_x + 1 ); ++x )
+					{
+						if ( !CellAt( x,y ).IsAlive() )
+						{
+							if ( CountAliveNeighbors( &CellAt( x,y ) ) == 3 )
+							{
+								changedStates.insert( &CellAt( x,y ) );
+							}
+						}
+					}
+				}
+
+				// Figure out if the cell dies in the next generation
+				if ( int neighbs = CountAliveNeighbors( pc ); neighbs < 2 || neighbs > 3 )
+				{
+					changedStates.insert( pc );
+					return false;
+				}
+				return true;
+			}
+		);
+		aliveCellPtrs = aliveNextGeneration;
+
+
+		// Toggle states for all marked cells and cleanup
+		for ( const auto& pc : changedStates )
+		{
+			pc->ToggleState();
+			// Add new alive cells to the vector
+			if ( pc->IsAlive() )
+			{
+				aliveCellPtrs.push_back( cellPtrs[CellToIndex( pc )].get() );
+			}
+		}
+
+		timeElapsed -= stepTime;
 	}
 }
 
@@ -147,12 +225,10 @@ std::vector<Drawable> Board::GetDrawables() const
 {
 	std::vector<Drawable> drawables;
 
-	for ( const auto& c : cells )
+	for ( const auto& pc : aliveCellPtrs )
 	{
-		if ( c->IsAlive() )
-		{
-			drawables.push_back( std::move( c->GetDrawable() ) );
-		}
+		assert( pc->IsAlive() );
+		drawables.push_back( std::move( pc->GetDrawable() ) );
 	}
 
 	return std::move( drawables );
@@ -161,4 +237,53 @@ std::vector<Drawable> Board::GetDrawables() const
 RectF Board::GetRect() const
 {
 	return rect;
+}
+
+int Board::CountAliveNeighbors( const Cell* target ) const
+{
+	const int center = CellToIndex( target );
+	const int center_y = center / nCellsAcross;
+	const int center_x = center - center_y * nCellsAcross;
+
+	int count = 0;
+	for ( auto y = std::max( 0,center_y - 1 ); y <= std::min( (int)nCellsUp - 1,center_y + 1 ); ++y )
+	{
+		for ( auto x = std::max( 0,center_x - 1 ); x <= std::min( (int)nCellsAcross - 1,center_x + 1 ); ++x )
+		{
+			count += CellAt( x,y ).IsAlive();
+		}
+	}
+	count -= CellAt( center_x,center_y ).IsAlive();
+
+	return count;
+}
+
+int Board::CellToIndex( const Cell* cp ) const
+{
+	Vec2 relPos = cp->GetPos() - Vec2{ rect.left,rect.bottom };
+	int x = int( relPos.x / Cell::GetSize() );
+	int y = int( relPos.y / Cell::GetSize() );
+	assert( x >= 0 );
+	assert( x < nCellsAcross );
+	assert( y >= 0 );
+	assert( y < nCellsUp );
+	return y * nCellsAcross + x;
+}
+
+const Board::Cell& Board::CellAt( int x,int y ) const
+{
+	assert( x >= 0 );
+	assert( x < nCellsAcross );
+	assert( y >= 0 );
+	assert( y < nCellsUp );
+	return *cellPtrs[y * (size_t)nCellsAcross + x];
+}
+
+Board::Cell& Board::CellAt( int x,int y )
+{
+	assert( x >= 0 );
+	assert( x < nCellsAcross );
+	assert( y >= 0 );
+	assert( y < nCellsUp );
+	return *cellPtrs[y * (size_t)nCellsAcross + x];
 }

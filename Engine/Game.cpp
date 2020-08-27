@@ -47,7 +47,7 @@ void Game::UpdateModel()
 {
 	const float dt = ft.Mark();
 	mcc.Update();
-	
+	brd.Update( dt );
 }
 
 void Game::ComposeFrame()
@@ -60,5 +60,4 @@ void Game::ComposeFrame()
 			cam.Draw( std::move( d ) );
 		}
 	}
-	// cam.DrawRect( brd.GetRect(),Colors::White );
 }

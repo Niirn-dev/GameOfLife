@@ -6,6 +6,7 @@
 #include "Colors.h"
 #include "Drawable.h"
 #include <memory>
+#include <functional>
 
 class Board
 {
@@ -27,6 +28,12 @@ private:
 		void SetColor( Color c_in );
 		void ToggleState();
 		bool IsAlive() const;
+		Vec2 GetPos() const;
+
+		bool operator==( const Cell& rhs )
+		{
+			return (Vei2)GetPos() == (Vei2)rhs.GetPos();
+		}
 	private:
 		RectF GetRect() const;
 
@@ -48,7 +55,6 @@ private:
 			return radius;
 		}
 	};
-
 	class Star : public Cell
 	{
 	public:
@@ -61,18 +67,27 @@ private:
 	};
 
 public:
-	Board( float width,float height );
+	Board( float width,float height,float stepTime = 1.0f );
 
+	void Update( float dt );
 	std::vector<Drawable> GetDrawables() const;
 	RectF GetRect() const;
+private:
+	int CountAliveNeighbors( const Cell* target ) const;
+	int CellToIndex( const Cell* cp ) const;
+	const Cell& CellAt( int x,int y ) const;
+	Cell& CellAt( int x,int y );
 
 private:
+	const float stepTime = 1.0f;
+	float timeElapsed = 0.0f;
 	const float width;
 	const float height;
 	const RectF rect;
-	const size_t nCellsAcross;
-	const size_t nCellsUp;
-	std::vector<std::unique_ptr<Cell>> cells;
+	const int nCellsAcross;
+	const int nCellsUp;
+	std::vector<std::unique_ptr<Cell>> cellPtrs;
+	std::vector<Cell*> aliveCellPtrs;
 
 	// Parameters for cell stars generation
 	static constexpr float maxOuterRadius	= 18.0f;
