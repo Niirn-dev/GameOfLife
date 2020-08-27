@@ -63,6 +63,7 @@ public:
 	void DrawLine( Vec2 p0,Vec2 p1,Color c );
 	void DrawRect( float left,float right,float top,float bottom,Color c );
 	void DrawClosedPolyline( const std::vector<Vec2>& verts,Color c );
+	void DrawClosedPolyline( std::vector<Vec2> verts,Color c,const Vec2& translation,float scale_x,float scale_y );
 
 	~Graphics();
 private:

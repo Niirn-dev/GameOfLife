@@ -386,6 +386,23 @@ void Graphics::DrawClosedPolyline( const std::vector<Vec2>& verts,Color c )
 	DrawLine( verts.back(),verts.front(),c );
 }
 
+void Graphics::DrawClosedPolyline( std::vector<Vec2> verts,Color c,const Vec2& translation,float scale_x,float scale_y )
+{
+	verts.front().x *= scale_x;
+	verts.front().y *= scale_y;
+	verts.front() += translation;
+
+	for ( auto vit = verts.begin(); vit != std::prev( verts.end() ); ++vit )
+	{
+		auto& next = *std::next( vit );
+		next.x *= scale_x;
+		next.y *= scale_y;
+		next += translation;
+		DrawLine( *vit,next,c );
+	}
+	DrawLine( verts.back(),verts.front(),c );
+}
+
 //////////////////////////////////////////////////
 //           Graphics Exception
 Graphics::Exception::Exception( HRESULT hr,const std::wstring& note,const wchar_t* file,unsigned int line )
