@@ -3,7 +3,6 @@
 #include <iterator>
 #include <random>
 #include <cassert>
-#include <unordered_set>
 #include <functional>
 
 Board::Cell::Cell( const Vec2& pos,Color c )
@@ -55,11 +54,56 @@ Drawable Board::Cell::GetDrawable() const
 	return std::move( drawable );
 }
 
+void Board::Cell::SetColor( Color c_in )
+{
+	c = c_in;
+}
+
+void Board::Cell::ToggleState()
+{
+	isAlive = !isAlive;
+	timeElapsed = 0.0f;
+}
+
+bool Board::Cell::IsAlive() const
+{
+	return isAlive;
+}
+
+Vec2 Board::Cell::GetPos() const
+{
+	return pos;
+}
+
+bool Board::Cell::AnimateTransition( float stepTime,float dt )
+{
+	timeElapsed += dt;
+	if ( isAlive )
+	{
+		SetScale( std::min( 1.5f * timeElapsed / stepTime,1.0f ) );
+	}
+	else
+	{
+		SetScale( std::max( -1.5f * timeElapsed / stepTime + 1.0f,0.0f ) );
+	}
+
+	if ( timeElapsed >= ( stepTime / 1.5f ) )
+	{
+		return true;
+	}
+	return false;
+}
+
+RectF Board::Cell::GetRect() const
+{
+	return RectF( pos - Vec2{ GetRadius(),GetRadius() },pos + Vec2{ GetRadius(),GetRadius() } );
+}
+
 Board::Star::Star( const Vec2& pos,Color c,float outerRadius,float radiiRatio,int nFlares,float angleOffset )
 	:
 	Cell( pos,c ),
 	outerRadius( std::min( outerRadius,GetRadius() ) ),
-	innerRadius( outerRadius * std::min( radiiRatio,1.0f / radiiRatio ) ),
+	innerRadius( outerRadius* std::min( radiiRatio,1.0f / radiiRatio ) ),
 	nFlares( nFlares )
 {
 	assert( angleOffset >= -3.14159f );
@@ -77,32 +121,6 @@ Board::Star::Star( const Vec2& pos,Color c,float outerRadius,float radiiRatio,in
 		);
 	}
 	SetModel( std::move( star ) );
-}
-
-
-void Board::Cell::SetColor( Color c_in )
-{
-	c = c_in;
-}
-
-void Board::Cell::ToggleState()
-{
-	isAlive = !isAlive;
-}
-
-bool Board::Cell::IsAlive() const
-{
-	return isAlive;
-}
-
-Vec2 Board::Cell::GetPos() const
-{
-	return pos;
-}
-
-RectF Board::Cell::GetRect() const
-{
-	return RectF( pos - Vec2{ GetRadius(),GetRadius() },pos + Vec2{ GetRadius(),GetRadius() } );
 }
 
 Board::Board( float width,float height,float stepTime/*= 1.0f*/ )
@@ -152,13 +170,6 @@ Board::Board( float width,float height,float stepTime/*= 1.0f*/ )
 			}
 		}
 	}
-
-	/*CellAt( 10,10 ).ToggleState();
-	aliveCellPtrs.push_back( &CellAt( 10,10 ) );
-	CellAt( 11,10 ).ToggleState();
-	aliveCellPtrs.push_back( &CellAt( 11,10 ) );
-	CellAt( 12,10 ).ToggleState();
-	aliveCellPtrs.push_back( &CellAt( 12,10 ) );*/
 }
 
 void Board::Update( float dt )
@@ -166,7 +177,7 @@ void Board::Update( float dt )
 	timeElapsed += dt;
 	while ( timeElapsed >= stepTime )
 	{
-		std::unordered_set<Cell*> changedStates;
+		assert( changedStates.empty() );
 		// Mark cells that are up for toggling
 		std::vector<Cell*> aliveNextGeneration;
 		std::copy_if(
@@ -219,6 +230,21 @@ void Board::Update( float dt )
 
 		timeElapsed -= stepTime;
 	}
+
+	if ( !changedStates.empty() )
+	{
+		for ( auto it = changedStates.begin(); it != changedStates.end(); )
+		{
+			if ( (*it)->AnimateTransition( stepTime,dt ) )
+			{
+				it = changedStates.erase( it );
+			}
+			else
+			{
+				++it;
+			}
+		}
+	}
 }
 
 std::vector<Drawable> Board::GetDrawables() const
@@ -229,6 +255,13 @@ std::vector<Drawable> Board::GetDrawables() const
 	{
 		assert( pc->IsAlive() );
 		drawables.push_back( std::move( pc->GetDrawable() ) );
+	}
+	for ( const auto& pc : changedStates )
+	{
+		if ( !pc->IsAlive() )
+		{
+			drawables.push_back( std::move( pc->GetDrawable() ) );
+		}
 	}
 
 	return std::move( drawables );

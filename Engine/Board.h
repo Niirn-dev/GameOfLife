@@ -6,7 +6,7 @@
 #include "Colors.h"
 #include "Drawable.h"
 #include <memory>
-#include <functional>
+#include <unordered_set>
 
 class Board
 {
@@ -29,6 +29,7 @@ private:
 		void ToggleState();
 		bool IsAlive() const;
 		Vec2 GetPos() const;
+		bool AnimateTransition( float stepTime,float dt );
 
 		bool operator==( const Cell& rhs )
 		{
@@ -44,6 +45,7 @@ private:
 		float scale = 1.0f;
 		Color c;
 		bool isAlive = false;
+		float timeElapsed = 0.0f;
 
 	public:
 		static float GetSize()
@@ -87,7 +89,8 @@ private:
 	const int nCellsAcross;
 	const int nCellsUp;
 	std::vector<std::unique_ptr<Cell>> cellPtrs;
-	std::vector<Cell*> aliveCellPtrs;
+	std::vector<Cell*> aliveCellPtrs; 
+	std::unordered_set<Cell*> changedStates;
 
 	// Parameters for cell stars generation
 	static constexpr float maxOuterRadius	= 18.0f;
