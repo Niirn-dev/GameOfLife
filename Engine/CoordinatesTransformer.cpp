@@ -1,4 +1,5 @@
 #include "CoordinatesTransformer.h"
+#include "Mat3.h"
 
 CoordinatesTransformer::CoordinatesTransformer( Graphics& gfx )
 	:
@@ -17,8 +18,10 @@ void CoordinatesTransformer::DrawRect( RectF rect,Color c ) const
 void CoordinatesTransformer::Draw( Drawable drawable ) const
 {
 	const Vec2 offset = Vec2{ float( Graphics::ScreenWidth / 2 ),float( Graphics::ScreenHeight / 2 ) };
-	drawable.ScaleIndividually( 1.0f,-1.0f );
-	drawable.Translate( offset );
+	drawable.ApplyTransformation(
+		Mat3::Translate( offset ) *
+		Mat3::Scale( 1.0f,-1.0f )
+	);
 	drawable.Render( gfx );
 }
 

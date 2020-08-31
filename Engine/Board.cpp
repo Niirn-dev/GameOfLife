@@ -4,6 +4,7 @@
 #include <random>
 #include <cassert>
 #include <functional>
+#include "Mat3.h"
 
 Board::Cell::Cell( const Vec2& pos,Color c )
 	:
@@ -49,8 +50,10 @@ float Board::Cell::GetScale() const
 Drawable Board::Cell::GetDrawable() const
 {
 	Drawable drawable( model,c,std::move( GetRect() ) );
-	drawable.Scale( scale );
-	drawable.Translate( pos );
+	drawable.ApplyTransformation(
+		Mat3::Translate( pos ) *
+		Mat3::Scale( scale )
+	);
 	return std::move( drawable );
 }
 

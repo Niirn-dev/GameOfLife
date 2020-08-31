@@ -8,29 +8,14 @@ Drawable::Drawable( const std::vector<Vec2>& model,Color c,RectF boundRect )
 {
 }
 
-void Drawable::Translate( const Vec2& offset )
+void Drawable::ApplyTransformation( const Mat3& transformation_in )
 {
-	translation += offset;
-}
-
-void Drawable::Scale( float factor )
-{
-	scale_x *= factor;
-	scale_y *= factor;
-	translation *= factor;
-}
-
-void Drawable::ScaleIndividually( float factor_x,float factor_y )
-{
-	scale_x *= factor_x;
-	scale_y *= factor_y;
-	translation.x *= factor_x;
-	translation.y *= factor_y;
+	transformation = transformation_in * transformation;
 }
 
 void Drawable::Render( Graphics& gfx )
 {
-	gfx.DrawClosedPolyline( model,c,translation,scale_x,scale_y );
+	gfx.DrawClosedPolyline( model,c,transformation );
 }
 
 const RectF& Drawable::GetRect() const

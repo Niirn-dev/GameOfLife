@@ -1,4 +1,5 @@
 #include "Camera.h"
+#include "Mat3.h"
 
 Camera::Camera( CoordinatesTransformer& ct )
     :
@@ -15,8 +16,10 @@ void Camera::DrawRect( RectF rect,Color c ) const
 
 void Camera::Draw( Drawable drawable ) const
 {
-    drawable.Translate( -pos );
-    drawable.Scale( scale );
+    drawable.ApplyTransformation(
+        Mat3::Scale( scale ) *
+        Mat3::Translate( -pos )
+    );
     ct.Draw( std::move( drawable ) );
 }
 

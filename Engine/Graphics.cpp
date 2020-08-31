@@ -386,21 +386,17 @@ void Graphics::DrawClosedPolyline( const std::vector<Vec2>& verts,Color c )
 	DrawLine( verts.back(),verts.front(),c );
 }
 
-void Graphics::DrawClosedPolyline( std::vector<Vec2> verts,Color c,const Vec2& translation,float scale_x,float scale_y )
+void Graphics::DrawClosedPolyline( const std::vector<Vec2>& verts,Color c,const Mat3& transformation )
 {
-	verts.front().x *= scale_x;
-	verts.front().y *= scale_y;
-	verts.front() += translation;
-
+	const auto front = transformation * verts.front();
+	auto cur = front;
 	for ( auto vit = verts.begin(); vit != std::prev( verts.end() ); ++vit )
 	{
-		auto& next = *std::next( vit );
-		next.x *= scale_x;
-		next.y *= scale_y;
-		next += translation;
-		DrawLine( *vit,next,c );
+		const auto next = transformation * *std::next( vit );
+		DrawLine( cur,next,c );
+		cur = next;
 	}
-	DrawLine( verts.back(),verts.front(),c );
+	DrawLine( cur,front,c );
 }
 
 //////////////////////////////////////////////////
