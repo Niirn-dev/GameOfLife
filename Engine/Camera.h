@@ -22,6 +22,7 @@ public:
 	void SetAngle( float a );
 	float GetAngle() const;
 	const Vec2& GetPosition() const;
+	void Reset();
 	bool ContainsDrawable( const Drawable& drawable ) const;
 
 private:

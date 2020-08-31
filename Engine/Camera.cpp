@@ -60,6 +60,13 @@ const Vec2& Camera::GetPosition() const
     return pos;
 }
 
+void Camera::Reset()
+{
+    pos = { 0.0f,0.0f };
+    scale = 1.0f;
+    angle = 0.0f;
+}
+
 bool Camera::ContainsDrawable( const Drawable& drawable ) const
 {
     const auto zoom = 1.0f / scale;

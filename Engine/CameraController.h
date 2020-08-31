@@ -9,7 +9,7 @@
 class CameraController
 {
 public:
-	CameraController( Mouse& mouse,const Keyboard& kbd,Camera& camera )
+	CameraController( Mouse& mouse,Keyboard& kbd,Camera& camera )
 		:
 		mouse( mouse ),
 		kbd( kbd ),
@@ -18,6 +18,7 @@ public:
 	}
 	void Update( float dt )
 	{
+		// Handle keyboard stuff
 		if ( kbd.KeyIsPressed( 'Q' ) )
 		{
 			cam.SetAngle( cam.GetAngle() - rotSpeed * dt );
@@ -26,7 +27,16 @@ public:
 		{
 			cam.SetAngle( cam.GetAngle() + rotSpeed * dt );
 		}
+		while ( !kbd.KeyIsEmpty() )
+		{
+			auto e = kbd.ReadKey();
+			if ( e.IsPress() && e.GetCode() == 'R' )
+			{
+				cam.Reset();
+			}
+		}
 
+		// Handle mousee stuff
 		while ( !mouse.IsEmpty() )
 		{
 			const auto e = mouse.Read();
@@ -63,7 +73,7 @@ public:
 
 private:
 	Mouse& mouse;
-	const Keyboard& kbd;
+	Keyboard& kbd;
 	Camera& cam;
 	static constexpr float scaleFactor = 1.05f;
 	static constexpr float rotSpeed = PI / 4.0f;
