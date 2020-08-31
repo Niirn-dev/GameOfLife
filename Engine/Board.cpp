@@ -6,10 +6,11 @@
 #include <functional>
 #include "Mat3.h"
 
-Board::Cell::Cell( const Vec2& pos,Color c )
+Board::Cell::Cell( const Vec2& pos,Color c,float rotSpeed/*= 0.0f*/ )
 	:
 	pos( pos ),
-	c( c )
+	c( c ),
+	rotSpeed( rotSpeed )
 {
 }
 
@@ -18,11 +19,12 @@ void Board::Cell::SetModel( std::vector<Vec2> model_in )
 	model = std::move( model_in );
 }
 
-Board::Cell::Cell( const Vec2& pos,Color c,std::vector<Vec2> model )
+Board::Cell::Cell( const Vec2& pos,Color c,std::vector<Vec2> model,float rotSpeed/* = 0.0f*/ )
 	:
 	model( std::move( model ) ),
 	pos( pos ),
-	c( c )
+	c( c ),
+	rotSpeed( rotSpeed )
 {
 }
 
@@ -47,11 +49,22 @@ float Board::Cell::GetScale() const
 	return scale;
 }
 
+void Board::Cell::SetAngle( float a )
+{
+	angle = a;
+}
+
+float Board::Cell::GetAngle() const
+{
+	return angle;
+}
+
 Drawable Board::Cell::GetDrawable() const
 {
 	Drawable drawable( model,c,std::move( GetRect() ) );
 	drawable.ApplyTransformation(
 		Mat3::Translate( pos ) *
+		Mat3::Rotate( angle ) *
 		Mat3::Scale( scale )
 	);
 	return std::move( drawable );
@@ -78,6 +91,16 @@ Vec2 Board::Cell::GetPos() const
 	return pos;
 }
 
+void Board::Cell::Update( float dt )
+{
+	UpdateRotation( dt );
+}
+
+void Board::Cell::UpdateRotation( float dt )
+{
+	SetAngle( GetAngle() + rotSpeed * dt );
+}
+
 bool Board::Cell::AnimateTransition( float stepTime,float dt )
 {
 	timeElapsed += dt;
@@ -89,6 +112,7 @@ bool Board::Cell::AnimateTransition( float stepTime,float dt )
 	{
 		SetScale( std::max( -1.5f * timeElapsed / stepTime + 1.0f,0.0f ) );
 	}
+	Update( dt );
 
 	if ( timeElapsed >= ( stepTime / 1.5f ) )
 	{
@@ -102,9 +126,9 @@ RectF Board::Cell::GetRect() const
 	return RectF( pos - Vec2{ GetRadius(),GetRadius() },pos + Vec2{ GetRadius(),GetRadius() } );
 }
 
-Board::Star::Star( const Vec2& pos,Color c,float outerRadius,float radiiRatio,int nFlares,float angleOffset )
+Board::Star::Star( const Vec2& pos,Color c,float outerRadius,float radiiRatio,int nFlares,float angleOffset,float rotSpeed/*= 0.0f*/ )
 	:
-	Cell( pos,c ),
+	Cell( pos,c,rotSpeed ),
 	outerRadius( std::min( outerRadius,GetRadius() ) ),
 	innerRadius( outerRadius* std::min( radiiRatio,1.0f / radiiRatio ) ),
 	nFlares( nFlares )
@@ -151,6 +175,7 @@ Board::Board( float width,float height,float stepTime/*= 1.0f*/ )
 	std::uniform_real_distribution<float> rrDist( minRatio,maxRatio );
 	std::uniform_int_distribution<int> flareDist( minFlares,maxFlares );
 	std::uniform_real_distribution<float> angleDist( minAngle,maxAngle );
+	std::uniform_real_distribution<float> rotSpeedDist( minRotSpeed,maxRotSpeed );
 
 	std::uniform_int_distribution<int> spawnDist( 0,100 );
 	cellPtrs.reserve( (size_t)nCellsAcross * nCellsUp );
@@ -164,7 +189,8 @@ Board::Board( float width,float height,float stepTime/*= 1.0f*/ )
 				orDist( rng ),
 				rrDist( rng ),
 				flareDist( rng ),
-				angleDist( rng )
+				angleDist( rng ),
+				rotSpeedDist( rng )
 			) );
 			if ( spawnDist( rng ) > 75 )
 			{
@@ -244,6 +270,11 @@ void Board::Update( float dt )
 		}
 
 		timeElapsed -= stepTime;
+	}
+
+	for ( auto it = aliveCellPtrs.begin(); it < aliveCellPtrs.end(); ++it )
+	{
+		( *it )->Update( dt );
 	}
 
 	if ( !changedStates.empty() )

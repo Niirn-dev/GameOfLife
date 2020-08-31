@@ -7,6 +7,7 @@
 #include "Drawable.h"
 #include <memory>
 #include <unordered_set>
+#include "MiscMath.h"
 
 class Board
 {
@@ -14,27 +15,28 @@ private:
 	class Cell
 	{
 	protected:
-		Cell( const Vec2& pos,Color c );
+		Cell( const Vec2& pos,Color c,float rotSpeed = 0.0f );
 		void SetModel( std::vector<Vec2> model_in );
 	private:
-		Cell( const Vec2& pos,Color c,std::vector<Vec2> model );
+		Cell( const Vec2& pos,Color c,std::vector<Vec2> model,float rotSpeed = 0.0f );
 	public:
 		static Cell MakeDefault( const Vec2& pos,Color c );
 		virtual ~Cell() = default;
 
 		void SetScale( float s );
 		float GetScale() const;
+		void SetAngle( float a );
+		float GetAngle() const;
 		Drawable GetDrawable() const;
 		void SetColor( Color c_in );
 		void ToggleState();
 		bool IsAlive() const;
 		Vec2 GetPos() const;
+		void Update( float dt );
+	private:
+		void UpdateRotation( float dt );
+	public:
 		bool AnimateTransition( float stepTime,float dt );
-
-		bool operator==( const Cell& rhs )
-		{
-			return (Vei2)GetPos() == (Vei2)rhs.GetPos();
-		}
 	private:
 		RectF GetRect() const;
 
@@ -43,6 +45,8 @@ private:
 		std::vector<Vec2> model;
 		Vec2 pos; ///< Center of the cell
 		float scale = 1.0f;
+		float angle = 0.0f;
+		float rotSpeed;
 		Color c;
 		bool isAlive = false;
 		float timeElapsed = 0.0f;
@@ -60,7 +64,7 @@ private:
 	class Star : public Cell
 	{
 	public:
-		Star( const Vec2& pos,Color c,float outerRadius,float radiiRatio,int nFlares,float angleOffset );
+		Star( const Vec2& pos,Color c,float outerRadius,float radiiRatio,int nFlares,float angleOffset,float rotSpeed = 0.0f );
 
 	private:
 		const float outerRadius;
@@ -107,7 +111,9 @@ private:
 	static constexpr float minRatio			= 0.2f;
 	static constexpr int   maxFlares		= 16;
 	static constexpr int   minFlares		= 3;
-	static constexpr float maxAngle			= 3.14159f;
-	static constexpr float minAngle			= -3.14159f;
+	static constexpr float maxAngle			= PI;
+	static constexpr float minAngle			= -PI;
+	static constexpr float minRotSpeed		= -1.5f;
+	static constexpr float maxRotSpeed		= 1.5f;
 };
 
