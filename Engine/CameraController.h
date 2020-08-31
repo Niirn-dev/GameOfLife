@@ -3,18 +3,30 @@
 #include "Mouse.h"
 #include "Camera.h"
 #include "Vec2.h"
+#include "Keyboard.h"
+#include "MiscMath.h"
 
-class MouseCameraController
+class CameraController
 {
 public:
-	MouseCameraController( Mouse& mouse,Camera& camera )
+	CameraController( Mouse& mouse,const Keyboard& kbd,Camera& camera )
 		:
 		mouse( mouse ),
+		kbd( kbd ),
 		cam( camera )
 	{
 	}
-	void Update()
+	void Update( float dt )
 	{
+		if ( kbd.KeyIsPressed( 'Q' ) )
+		{
+			cam.SetAngle( cam.GetAngle() - rotSpeed * dt );
+		}
+		if ( kbd.KeyIsPressed( 'E' ) )
+		{
+			cam.SetAngle( cam.GetAngle() + rotSpeed * dt );
+		}
+
 		while ( !mouse.IsEmpty() )
 		{
 			const auto e = mouse.Read();
@@ -42,6 +54,7 @@ public:
 			const Vei2 curMousePos = mouse.GetPos();
 			Vec2 deltaPos = Vec2( curMousePos - prevPos );
 			deltaPos.x *= -1.0f;
+			deltaPos.Rotate( cam.GetAngle() );
 
 			cam.MoveBy( deltaPos / cam.GetScale() );
 			prevPos = curMousePos;
@@ -50,8 +63,10 @@ public:
 
 private:
 	Mouse& mouse;
+	const Keyboard& kbd;
 	Camera& cam;
 	static constexpr float scaleFactor = 1.05f;
+	static constexpr float rotSpeed = PI / 4.0f;
 	Vei2 prevPos = { 0,0 };
 	bool isEngaged = false;
 };

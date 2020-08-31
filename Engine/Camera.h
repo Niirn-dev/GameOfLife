@@ -19,6 +19,8 @@ public:
 	float GetScale() const;
 	void SetPosition( const Vec2& pos_in );
 	void MoveBy( const Vec2& offset );
+	void SetAngle( float a );
+	float GetAngle() const;
 	const Vec2& GetPosition() const;
 	bool ContainsDrawable( const Drawable& drawable ) const;
 
@@ -26,5 +28,6 @@ private:
 	CoordinatesTransformer& ct;
 	Vec2 pos = { 0.0f,0.0f };
 	float scale = 1.0f;
+	float angle = 0.0f;
 };
 

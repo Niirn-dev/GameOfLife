@@ -28,7 +28,7 @@
 #include <memory>
 #include "CoordinatesTransformer.h"
 #include "Camera.h"
-#include "MouseCameraController.h"
+#include "CameraController.h"
 #include "Board.h"
 
 class Game
@@ -52,7 +52,7 @@ private:
 	FrameTimer ft;
 	CoordinatesTransformer ct;
 	Camera cam;
-	MouseCameraController mcc;
+	CameraController camCtrl;
 	Bencher b;
 	static constexpr float boardWidth = 1600.0f;
 	static constexpr float boardHeight = 1200.0f;

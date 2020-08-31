@@ -89,6 +89,19 @@ public:
 		}
 		return *this;
 	}
+	Vec2_&	Rotate( T angle )
+	{
+		const T sint = std::sin( angle );
+		const T cost = std::cos( angle );
+		return Rotate( sint,cost );
+	}
+	Vec2_&	Rotate( T sint,T cost )
+	{
+		T new_x = x * cost - y * sint;
+		y = x * sint + y * cost;
+		x = new_x;
+		return *this;
+	}
 public:
 	T x;
 	T y;

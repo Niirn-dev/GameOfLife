@@ -156,8 +156,9 @@
     <ClInclude Include="Keyboard.h" />
     <ClInclude Include="MainWindow.h" />
     <ClInclude Include="Mat3.h" />
+    <ClInclude Include="MiscMath.h" />
     <ClInclude Include="Mouse.h" />
-    <ClInclude Include="MouseCameraController.h" />
+    <ClInclude Include="CameraController.h" />
     <ClInclude Include="Rect.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Sound.h" />

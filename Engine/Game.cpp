@@ -30,7 +30,7 @@ Game::Game( MainWindow& wnd )
 	gfx( wnd ),
 	ct( gfx ),
 	cam( ct ),
-	mcc( wnd.mouse,cam ),
+	camCtrl( wnd.mouse,wnd.kbd,cam ),
 	brd( boardWidth,boardHeight )
 {
 }
@@ -46,7 +46,7 @@ void Game::Go()
 void Game::UpdateModel()
 {
 	const float dt = ft.Mark();
-	mcc.Update();
+	camCtrl.Update( dt );
 	brd.Update( dt );
 }
 

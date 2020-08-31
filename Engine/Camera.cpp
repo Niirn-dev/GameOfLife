@@ -1,5 +1,6 @@
 #include "Camera.h"
 #include "Mat3.h"
+#include "MiscMath.h"
 
 Camera::Camera( CoordinatesTransformer& ct )
     :
@@ -17,6 +18,7 @@ void Camera::DrawRect( RectF rect,Color c ) const
 void Camera::Draw( Drawable drawable ) const
 {
     drawable.ApplyTransformation(
+        Mat3::Rotate( -angle ) *
         Mat3::Scale( scale ) *
         Mat3::Translate( -pos )
     );
@@ -43,6 +45,16 @@ void Camera::MoveBy( const Vec2& offset )
     pos += offset;
 }
 
+void Camera::SetAngle( float a )
+{
+    angle = a;
+}
+
+float Camera::GetAngle() const
+{
+    return angle;
+}
+
 const Vec2& Camera::GetPosition() const
 {
     return pos;
@@ -50,9 +62,11 @@ const Vec2& Camera::GetPosition() const
 
 bool Camera::ContainsDrawable( const Drawable& drawable ) const
 {
-    auto screenRect = ct.GetScreenRect();
-    screenRect.Scale( 1.0f / scale );
-    screenRect.Translate( pos );
-
+    const auto zoom = 1.0f / scale;
+    const auto rad = std::sqrt(
+        sq( float( Graphics::ScreenWidth / 2 ) * zoom ) +
+        sq( float( Graphics::ScreenHeight / 2 ) * zoom )
+    );
+    auto screenRect = RectF::FromCenter( pos,rad,rad );
     return screenRect.IsOverlappingWith( drawable.GetRect() );
 }
