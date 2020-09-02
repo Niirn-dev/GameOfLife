@@ -308,7 +308,17 @@ void Board::UpdateCells( float dt )
 
 void Board::OnToggleCellStateClick( const Vec2& screenPos )
 {
-	// CellAtScreen( screenPos ).ToggleState();
+	Cell& cell = CellAtScreen( screenPos );
+	cell.ToggleState();
+	changedStates.insert( &cell );
+	if ( cell.IsAlive() )
+	{
+		aliveCellPtrs.push_back( &cell );
+	}
+	else
+	{
+		std::remove( aliveCellPtrs.begin(),aliveCellPtrs.end(),&cell );
+	}
 }
 
 void Board::OnPauseClick()

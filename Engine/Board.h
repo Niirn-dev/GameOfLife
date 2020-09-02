@@ -106,7 +106,7 @@ private:
 	const int nCellsAcross;
 	const int nCellsUp;
 	std::vector<std::unique_ptr<Cell>> cellPtrs;
-	std::vector<Cell*> aliveCellPtrs; 
+	std::vector<Cell*> aliveCellPtrs;
 	std::unordered_set<Cell*> changedStates;
 
 	static constexpr int borderThickness = 3;
