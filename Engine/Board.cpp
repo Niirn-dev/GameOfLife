@@ -215,6 +215,11 @@ void Board::GenerateBorderModel()
 
 void Board::Update( float dt )
 {
+	if ( isPaused )
+	{
+		return;
+	}
+
 	timeElapsed += dt;
 	if ( timeElapsed >= stepTime )
 	{
@@ -291,6 +296,16 @@ void Board::Update( float dt )
 			}
 		}
 	}
+}
+
+void Board::OnToggleCellStateClick( const Vec2& screenPos )
+{
+	// CellAtScreen( screenPos ).ToggleState();
+}
+
+void Board::OnPauseClick()
+{
+	isPaused = !isPaused;
 }
 
 std::vector<Drawable> Board::GetDrawables() const
@@ -377,4 +392,13 @@ Board::Cell& Board::CellAt( int x,int y )
 	assert( y >= 0 );
 	assert( y < nCellsUp );
 	return *cellPtrs[y * (size_t)nCellsAcross + x];
+}
+
+Board::Cell& Board::CellAtScreen( const Vec2& screenPos )
+{
+	assert( rect.Contains( screenPos ) );
+	Vec2 relPos = screenPos - Vec2{ rect.left,rect.bottom };
+	int x = int( relPos.x / Cell::GetSize() );
+	int y = int( relPos.y / Cell::GetSize() );
+	return CellAt( x,y );
 }

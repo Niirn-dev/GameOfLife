@@ -79,6 +79,8 @@ private:
 
 public:
 	void Update( float dt );
+	void OnToggleCellStateClick( const Vec2& screenPos );
+	void OnPauseClick();
 	std::vector<Drawable> GetDrawables() const;
 	RectF GetRect() const;
 	std::vector<Drawable> GetBorderDrawables() const;
@@ -87,10 +89,12 @@ private:
 	int CellToIndex( const Cell* cp ) const;
 	const Cell& CellAt( int x,int y ) const;
 	Cell& CellAt( int x,int y );
+	Cell& CellAtScreen( const Vec2& screenPos );
 
 private:
 	const float stepTime = 1.0f;
 	float timeElapsed = 0.0f;
+	bool isPaused = false;
 	const float width;
 	const float height;
 	const RectF rect;

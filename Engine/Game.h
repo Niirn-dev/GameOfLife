@@ -44,6 +44,7 @@ private:
 	void UpdateModel();
 	/********************************/
 	/*  User Functions              */
+	void ParseInput( float dt );
 	/********************************/
 private:
 	MainWindow& wnd;
@@ -59,8 +60,5 @@ private:
 	static constexpr float boardWidth = 1600.0f;
 	static constexpr float boardHeight = 1200.0f;
 	Board brd;
-
-	std::vector<Vec2> model;
-	Vec2 pos = { 0.0f,0.0f };
 	/********************************/
 };
