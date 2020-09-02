@@ -78,6 +78,11 @@ private:
 
 public:
 	void Update( float dt );
+private:
+	void UpdateBoardState();
+	void UpdateCells( float dt );
+
+public:
 	void OnToggleCellStateClick( const Vec2& screenPos );
 	void OnPauseClick();
 	std::vector<Drawable> GetDrawables() const;

@@ -221,60 +221,70 @@ void Board::Update( float dt )
 	stepTime += dt;
 	if ( stepTime >= stepDuration )
 	{
-		assert( changedStates.empty() );
-		// Mark cells that are up for toggling
-		std::vector<Cell*> aliveNextGeneration;
-		std::copy_if(
-			aliveCellPtrs.begin(),aliveCellPtrs.end(),
-			std::back_inserter( aliveNextGeneration ),
-			[&]( Cell* pc )
-			{
-				// Get index of the cell
-				const int center = CellToIndex( pc );
-				const int center_y = center / nCellsAcross;
-				const int center_x = center - center_y * nCellsAcross;
-
-				// Figure out the future state of dead neighbors in the next generation
-				for ( auto y = std::max( 0,center_y - 1 ); y <= std::min( (int)nCellsUp - 1,center_y + 1 ); ++y )
-				{
-					for ( auto x = std::max( 0,center_x - 1 ); x <= std::min( (int)nCellsAcross - 1,center_x + 1 ); ++x )
-					{
-						if ( !CellAt( x,y ).IsAlive() )
-						{
-							if ( CountAliveNeighbors( &CellAt( x,y ) ) == 3 )
-							{
-								changedStates.insert( &CellAt( x,y ) );
-							}
-						}
-					}
-				}
-
-				// Figure out if the cell dies in the next generation
-				if ( int neighbs = CountAliveNeighbors( pc ); neighbs < 2 || neighbs > 3 )
-				{
-					changedStates.insert( pc );
-					return false;
-				}
-				return true;
-			}
-		);
-		aliveCellPtrs = aliveNextGeneration;
-
-
-		// Toggle states for all marked cells and cleanup
-		for ( const auto& pc : changedStates )
-		{
-			pc->ToggleState();
-			// Add new alive cells to the vector
-			if ( pc->IsAlive() )
-			{
-				aliveCellPtrs.push_back( cellPtrs[CellToIndex( pc )].get() );
-			}
-		}
+		UpdateBoardState();
 
 		stepTime -= stepDuration;
 	}
 
+	UpdateCells( dt );
+}
+
+void Board::UpdateBoardState()
+{
+	assert( changedStates.empty() );
+	// Mark cells that are up for toggling
+	std::vector<Cell*> aliveNextGeneration;
+	std::copy_if(
+		aliveCellPtrs.begin(),aliveCellPtrs.end(),
+		std::back_inserter( aliveNextGeneration ),
+		[&]( Cell* pc )
+		{
+			// Get index of the cell
+			const int center = CellToIndex( pc );
+			const int center_y = center / nCellsAcross;
+			const int center_x = center - center_y * nCellsAcross;
+
+			// Figure out the future state of dead neighbors in the next generation
+			for ( auto y = std::max( 0,center_y - 1 ); y <= std::min( (int)nCellsUp - 1,center_y + 1 ); ++y )
+			{
+				for ( auto x = std::max( 0,center_x - 1 ); x <= std::min( (int)nCellsAcross - 1,center_x + 1 ); ++x )
+				{
+					if ( !CellAt( x,y ).IsAlive() )
+					{
+						if ( CountAliveNeighbors( &CellAt( x,y ) ) == 3 )
+						{
+							changedStates.insert( &CellAt( x,y ) );
+						}
+					}
+				}
+			}
+
+			// Figure out if the cell dies in the next generation
+			if ( int neighbs = CountAliveNeighbors( pc ); neighbs < 2 || neighbs > 3 )
+			{
+				changedStates.insert( pc );
+				return false;
+			}
+			return true;
+		}
+	);
+	aliveCellPtrs = aliveNextGeneration;
+
+
+	// Toggle states for all marked cells and cleanup
+	for ( const auto& pc : changedStates )
+	{
+		pc->ToggleState();
+		// Add new alive cells to the vector
+		if ( pc->IsAlive() )
+		{
+			aliveCellPtrs.push_back( cellPtrs[CellToIndex( pc )].get() );
+		}
+	}
+}
+
+void Board::UpdateCells( float dt )
+{
 	for ( auto it = aliveCellPtrs.begin(); it < aliveCellPtrs.end(); ++it )
 	{
 		( *it )->Update( *this,dt );
@@ -284,7 +294,7 @@ void Board::Update( float dt )
 	{
 		for ( auto it = changedStates.begin(); it != changedStates.end(); )
 		{
-			if ( (*it)->AnimateTransition( *this,dt ) )
+			if ( ( *it )->AnimateTransition( *this,dt ) )
 			{
 				it = changedStates.erase( it );
 			}
