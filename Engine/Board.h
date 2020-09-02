@@ -32,11 +32,11 @@ private:
 		void ToggleState();
 		bool IsAlive() const;
 		Vec2 GetPos() const;
-		void Update( float dt );
+		void Update( const Board& brd,float dt );
 	private:
-		void UpdateRotation( float dt );
+		void UpdateRotation( const Board& brd,float dt );
 	public:
-		bool AnimateTransition( float stepTime,float dt );
+		bool AnimateTransition( const Board& brd,float dt );
 	private:
 		RectF GetRect() const;
 
@@ -49,7 +49,6 @@ private:
 		float rotSpeed;
 		Color c;
 		bool isAlive = false;
-		float timeElapsed = 0.0f;
 
 	public:
 		static float GetSize()
@@ -73,7 +72,7 @@ private:
 	};
 
 public:
-	Board( float width,float height,float stepTime = 1.0f );
+	Board( float width,float height,float stepDuration = 1.0f );
 private:
 	void GenerateBorderModel();
 
@@ -84,6 +83,7 @@ public:
 	std::vector<Drawable> GetDrawables() const;
 	RectF GetRect() const;
 	std::vector<Drawable> GetBorderDrawables() const;
+
 private:
 	int CountAliveNeighbors( const Cell* target ) const;
 	int CellToIndex( const Cell* cp ) const;
@@ -92,8 +92,8 @@ private:
 	Cell& CellAtScreen( const Vec2& screenPos );
 
 private:
-	const float stepTime = 1.0f;
-	float timeElapsed = 0.0f;
+	const float stepDuration = 1.0f;
+	float stepTime = 0.0f;
 	bool isPaused = false;
 	const float width;
 	const float height;

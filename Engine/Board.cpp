@@ -78,7 +78,6 @@ void Board::Cell::SetColor( Color c_in )
 void Board::Cell::ToggleState()
 {
 	isAlive = !isAlive;
-	timeElapsed = 0.0f;
 }
 
 bool Board::Cell::IsAlive() const
@@ -91,30 +90,29 @@ Vec2 Board::Cell::GetPos() const
 	return pos;
 }
 
-void Board::Cell::Update( float dt )
+void Board::Cell::Update( const Board& brd,float dt )
 {
-	UpdateRotation( dt );
+	UpdateRotation( brd,dt );
 }
 
-void Board::Cell::UpdateRotation( float dt )
+void Board::Cell::UpdateRotation( const Board& brd,float dt )
 {
 	SetAngle( GetAngle() + rotSpeed * dt );
 }
 
-bool Board::Cell::AnimateTransition( float stepTime,float dt )
+bool Board::Cell::AnimateTransition( const Board& brd,float dt )
 {
-	timeElapsed += dt;
 	if ( isAlive )
 	{
-		SetScale( std::min( 1.5f * timeElapsed / stepTime,1.0f ) );
+		SetScale( std::min( 1.5f * brd.stepTime / brd.stepDuration,1.0f ) );
 	}
 	else
 	{
-		SetScale( std::max( -1.5f * timeElapsed / stepTime + 1.0f,0.0f ) );
+		SetScale( std::max( -1.5f * brd.stepTime / brd.stepDuration + 1.0f,0.0f ) );
+		Update( brd,dt );
 	}
-	Update( dt );
 
-	if ( timeElapsed >= ( stepTime / 1.5f ) )
+	if ( brd.stepTime >= ( brd.stepDuration / 1.5f ) )
 	{
 		return true;
 	}
@@ -150,9 +148,9 @@ Board::Star::Star( const Vec2& pos,Color c,float outerRadius,float radiiRatio,in
 	SetModel( std::move( star ) );
 }
 
-Board::Board( float width,float height,float stepTime/*= 1.0f*/ )
+Board::Board( float width,float height,float stepDuration/*= 1.0f*/ )
 	:
-	stepTime( stepTime ),
+	stepDuration( stepDuration ),
 	width( width ),
 	height( height ),
 	rect( -width / 2.0f,width / 2.0f,height / 2.0f,-height / 2.0f ),
@@ -220,8 +218,8 @@ void Board::Update( float dt )
 		return;
 	}
 
-	timeElapsed += dt;
-	if ( timeElapsed >= stepTime )
+	stepTime += dt;
+	if ( stepTime >= stepDuration )
 	{
 		assert( changedStates.empty() );
 		// Mark cells that are up for toggling
@@ -274,19 +272,19 @@ void Board::Update( float dt )
 			}
 		}
 
-		timeElapsed -= stepTime;
+		stepTime -= stepDuration;
 	}
 
 	for ( auto it = aliveCellPtrs.begin(); it < aliveCellPtrs.end(); ++it )
 	{
-		( *it )->Update( dt );
+		( *it )->Update( *this,dt );
 	}
 
 	if ( !changedStates.empty() )
 	{
 		for ( auto it = changedStates.begin(); it != changedStates.end(); )
 		{
-			if ( (*it)->AnimateTransition( stepTime,dt ) )
+			if ( (*it)->AnimateTransition( *this,dt ) )
 			{
 				it = changedStates.erase( it );
 			}
