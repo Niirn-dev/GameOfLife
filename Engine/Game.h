@@ -30,6 +30,7 @@
 #include "Camera.h"
 #include "CameraController.h"
 #include "Board.h"
+#include "MouseInputTransformer.h"
 
 class Game
 {
@@ -53,9 +54,13 @@ private:
 	CoordinatesTransformer ct;
 	Camera cam;
 	CameraController camCtrl;
+	MouseInputTransformer mouseIn;
 	Bencher b;
 	static constexpr float boardWidth = 1600.0f;
 	static constexpr float boardHeight = 1200.0f;
 	Board brd;
+
+	std::vector<Vec2> model;
+	Vec2 pos = { 0.0f,0.0f };
 	/********************************/
 };

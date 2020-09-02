@@ -18,9 +18,7 @@ void Camera::DrawRect( RectF rect,Color c ) const
 void Camera::Draw( Drawable drawable ) const
 {
     drawable.ApplyTransformation(
-        Mat3::Rotate( -angle ) *
-        Mat3::Scale( scale ) *
-        Mat3::Translate( -pos )
+        GetTransformation()
     );
     ct.Draw( std::move( drawable ) );
 }
@@ -76,4 +74,20 @@ bool Camera::ContainsDrawable( const Drawable& drawable ) const
     );
     auto screenRect = RectF::FromCenter( pos,rad,rad );
     return screenRect.IsOverlappingWith( drawable.GetRect() );
+}
+
+Mat3 Camera::GetTransformation() const
+{
+    return 
+        Mat3::Rotate( -angle ) *
+        Mat3::Scale( scale ) *
+        Mat3::Translate( -pos );
+}
+
+Mat3 Camera::GetTransformationInverse() const
+{
+    return
+        Mat3::Translate( pos ) *
+        Mat3::Rotate( angle ) *
+        Mat3::Scale( 1.0f / scale );
 }

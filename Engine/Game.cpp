@@ -31,8 +31,13 @@ Game::Game( MainWindow& wnd )
 	ct( gfx ),
 	cam( ct ),
 	camCtrl( wnd.mouse,wnd.kbd,cam ),
+	mouseIn( wnd.mouse,cam,ct ),
 	brd( boardWidth,boardHeight )
 {
+	model.emplace_back( 1.0f,1.0f );
+	model.emplace_back( 1.0f,-1.0f );
+	model.emplace_back( -1.0f,-1.0f );
+	model.emplace_back( -1.0f,1.0f );
 }
 
 void Game::Go()
@@ -46,13 +51,29 @@ void Game::Go()
 void Game::UpdateModel()
 {
 	const float dt = ft.Mark();
-	camCtrl.Update( dt );
+
+	camCtrl.UpdateKeyboard( dt );
+	while ( !wnd.kbd.KeyIsEmpty() )
+	{
+		auto e = wnd.kbd.ReadKey();
+		camCtrl.UpdateKeyboardEvent( e,dt );
+	}
+	while ( !wnd.mouse.IsEmpty() )
+	{
+		auto e = wnd.mouse.Read();
+		camCtrl.UpdateMouseEvent( e,dt );
+		if ( e.GetType() == Mouse::Event::Type::RPress )
+		{
+			pos = mouseIn.GetMousePos( e );
+		}
+	}
+
 	brd.Update( dt );
 }
 
 void Game::ComposeFrame()
 {
-	std::vector<Drawable> drawables = std::move( brd.GetDrawables() );
+	/*std::vector<Drawable> drawables = std::move( brd.GetDrawables() );
 	for ( auto d : drawables )
 	{
 		if ( cam.ContainsDrawable( d ) )
@@ -65,5 +86,9 @@ void Game::ComposeFrame()
 	for ( auto d : drawables )
 	{
 		cam.Draw( std::move( d ) );
-	}
+	}*/
+
+	Drawable d{ model,Colors::Yellow,RectF( -1.0f,1.0f,1.0f,-1.0f ) };
+	d.ApplyTransformation( Mat3::Translate( pos ) );
+	cam.Draw( d );
 }

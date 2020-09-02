@@ -24,6 +24,8 @@ public:
 	const Vec2& GetPosition() const;
 	void Reset();
 	bool ContainsDrawable( const Drawable& drawable ) const;
+	Mat3 GetTransformation() const;
+	Mat3 GetTransformationInverse() const;
 
 private:
 	CoordinatesTransformer& ct;

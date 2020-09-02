@@ -12,6 +12,8 @@ public:
 	void DrawRect( RectF rect,Color c ) const;
 	void Draw( Drawable drawable ) const;
 	RectF GetScreenRect() const;
+	Mat3 GetTransformation() const;
+	Mat3 GetTransformationInverse() const;
 
 private:
 	Graphics& gfx;

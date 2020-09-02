@@ -16,9 +16,8 @@ public:
 		cam( camera )
 	{
 	}
-	void Update( float dt )
+	void UpdateKeyboard( float dt )
 	{
-		// Handle keyboard stuff
 		if ( kbd.KeyIsPressed( 'Q' ) )
 		{
 			cam.SetAngle( cam.GetAngle() - rotSpeed * dt );
@@ -27,37 +26,33 @@ public:
 		{
 			cam.SetAngle( cam.GetAngle() + rotSpeed * dt );
 		}
-		while ( !kbd.KeyIsEmpty() )
+	}
+	void UpdateKeyboardEvent( Keyboard::Event e,float dt )
+	{
+		if ( e.IsPress() && e.GetCode() == 'R' )
 		{
-			auto e = kbd.ReadKey();
-			if ( e.IsPress() && e.GetCode() == 'R' )
-			{
-				cam.Reset();
-			}
+			cam.Reset();
 		}
-
-		// Handle mousee stuff
-		while ( !mouse.IsEmpty() )
+	}
+	void UpdateMouseEvent( Mouse::Event e,float dt )
+	{
+		switch ( e.GetType() )
 		{
-			const auto e = mouse.Read();
-			switch ( e.GetType() )
-			{
-			case Mouse::Event::Type::LPress:
-				prevPos = e.GetPos();
-				isEngaged = true;
-				break;
-			case Mouse::Event::Type::LRelease:
-				isEngaged = false;
-				break;
-			case Mouse::Event::Type::WheelUp:
-				cam.SetScale( cam.GetScale() * scaleFactor );
-				break;
-			case Mouse::Event::Type::WheelDown:
-				cam.SetScale( cam.GetScale() / scaleFactor);
-				break;
-			default:
-				break;
-			}
+		case Mouse::Event::Type::LPress:
+			prevPos = e.GetPos();
+			isEngaged = true;
+			break;
+		case Mouse::Event::Type::LRelease:
+			isEngaged = false;
+			break;
+		case Mouse::Event::Type::WheelUp:
+			cam.SetScale( cam.GetScale() * scaleFactor );
+			break;
+		case Mouse::Event::Type::WheelDown:
+			cam.SetScale( cam.GetScale() / scaleFactor);
+			break;
+		default:
+			break;
 		}
 		if ( isEngaged )
 		{

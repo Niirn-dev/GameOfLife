@@ -17,10 +17,8 @@ void CoordinatesTransformer::DrawRect( RectF rect,Color c ) const
 
 void CoordinatesTransformer::Draw( Drawable drawable ) const
 {
-	const Vec2 offset = Vec2{ float( Graphics::ScreenWidth / 2 ),float( Graphics::ScreenHeight / 2 ) };
 	drawable.ApplyTransformation(
-		Mat3::Translate( offset ) *
-		Mat3::Scale( 1.0f,-1.0f )
+		GetTransformation()
 	);
 	drawable.Render( gfx );
 }
@@ -29,4 +27,22 @@ RectF CoordinatesTransformer::GetScreenRect() const
 {
 	const Vec2 offset = Vec2{ float( Graphics::ScreenWidth / 2 ),float( Graphics::ScreenHeight / 2 ) };
 	return RectF( -offset,offset );
+}
+
+Mat3 CoordinatesTransformer::GetTransformation() const
+{
+	const Vec2 offset = Vec2{ float( Graphics::ScreenWidth / 2 ),float( Graphics::ScreenHeight / 2 ) };
+	return Mat3(
+		Mat3::Translate( offset ) *
+		Mat3::Scale( 1.0f,-1.0f )
+	);
+}
+
+Mat3 CoordinatesTransformer::GetTransformationInverse() const
+{
+	const Vec2 offset = Vec2{ float( Graphics::ScreenWidth / 2 ),float( Graphics::ScreenHeight / 2 ) };
+	return Mat3(
+		Mat3::Scale( 1.0f,-1.0f ) *
+		Mat3::Translate( -offset )
+	);
 }

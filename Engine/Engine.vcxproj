@@ -159,6 +159,7 @@
     <ClInclude Include="MiscMath.h" />
     <ClInclude Include="Mouse.h" />
     <ClInclude Include="CameraController.h" />
+    <ClInclude Include="MouseInputTransformer.h" />
     <ClInclude Include="Rect.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Sound.h" />
