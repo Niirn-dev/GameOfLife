@@ -78,6 +78,7 @@ void Board::Cell::SetColor( Color c_in )
 void Board::Cell::ToggleState()
 {
 	isAlive = !isAlive;
+	isTransitioning = true;
 }
 
 bool Board::Cell::IsAlive() const
@@ -85,14 +86,26 @@ bool Board::Cell::IsAlive() const
 	return isAlive;
 }
 
+bool Board::Cell::IsTransitioning() const
+{
+	return isTransitioning;
+}
+
 Vec2 Board::Cell::GetPos() const
 {
 	return pos;
 }
 
-void Board::Cell::Update( const Board& brd,float dt )
+bool Board::Cell::Update( const Board& brd,float dt )
 {
 	UpdateRotation( brd,dt );
+	if ( isTransitioning )
+	{
+		return AnimateTransition( brd,dt );
+	}
+	// if we got here that means the cell should be alive because we shouldn't update dead cells that finished transitioning
+	assert( isAlive );
+	return false;
 }
 
 void Board::Cell::UpdateRotation( const Board& brd,float dt )
@@ -109,12 +122,12 @@ bool Board::Cell::AnimateTransition( const Board& brd,float dt )
 	else
 	{
 		SetScale( std::max( -1.5f * brd.stepTime / brd.stepDuration + 1.0f,0.0f ) );
-		Update( brd,dt );
 	}
 
 	if ( brd.stepTime >= ( brd.stepDuration / 1.5f ) )
 	{
-		return true;
+		isTransitioning = false;
+		return !isAlive;
 	}
 	return false;
 }
@@ -194,6 +207,7 @@ Board::Board( float width,float height,float stepDuration/*= 1.0f*/ )
 			{
 				cellPtrs.back()->ToggleState();
 				aliveCellPtrs.push_back( cellPtrs.back().get() );
+				updateCellPtrs.insert( cellPtrs.back().get() );
 			}
 		}
 	}
@@ -231,7 +245,7 @@ void Board::Update( float dt )
 
 void Board::UpdateBoardState()
 {
-	assert( changedStates.empty() );
+	std::unordered_set<Cell*> changedStates;
 	// Mark cells that are up for toggling
 	std::vector<Cell*> aliveNextGeneration;
 	std::copy_if(
@@ -280,28 +294,21 @@ void Board::UpdateBoardState()
 		{
 			aliveCellPtrs.push_back( cellPtrs[CellToIndex( pc )].get() );
 		}
+		// Update all cells that changed states
+		updateCellPtrs.insert( pc );
 	}
 }
 
 void Board::UpdateCells( float dt )
 {
-	for ( auto it = aliveCellPtrs.begin(); it < aliveCellPtrs.end(); ++it )
-	{
-		( *it )->Update( *this,dt );
-	}
-
-	if ( !changedStates.empty() )
-	{
-		for ( auto it = changedStates.begin(); it != changedStates.end(); )
+	for ( auto it = updateCellPtrs.begin(); it != updateCellPtrs.end(); ) {
+		if ( ( *it )->Update( *this,dt ) ) 
 		{
-			if ( ( *it )->AnimateTransition( *this,dt ) )
-			{
-				it = changedStates.erase( it );
-			}
-			else
-			{
-				++it;
-			}
+			it = updateCellPtrs.erase( it );
+		}
+		else 
+		{
+			++it;
 		}
 	}
 }
@@ -310,14 +317,14 @@ void Board::OnToggleCellStateClick( const Vec2& screenPos )
 {
 	Cell& cell = CellAtScreen( screenPos );
 	cell.ToggleState();
-	changedStates.insert( &cell );
+	updateCellPtrs.insert( &cell );
 	if ( cell.IsAlive() )
 	{
 		aliveCellPtrs.push_back( &cell );
 	}
 	else
 	{
-		std::remove( aliveCellPtrs.begin(),aliveCellPtrs.end(),&cell );
+		aliveCellPtrs.erase( std::remove( aliveCellPtrs.begin(),aliveCellPtrs.end(),&cell ),aliveCellPtrs.end() );
 	}
 }
 
@@ -330,17 +337,10 @@ std::vector<Drawable> Board::GetDrawables() const
 {
 	std::vector<Drawable> drawables;
 
-	for ( const auto& pc : aliveCellPtrs )
+	for ( const auto& pc : updateCellPtrs )
 	{
-		assert( pc->IsAlive() );
+		assert( pc->IsAlive() || pc->IsTransitioning() );
 		drawables.push_back( std::move( pc->GetDrawable() ) );
-	}
-	for ( const auto& pc : changedStates )
-	{
-		if ( !pc->IsAlive() )
-		{
-			drawables.push_back( std::move( pc->GetDrawable() ) );
-		}
 	}
 
 	return std::move( drawables );

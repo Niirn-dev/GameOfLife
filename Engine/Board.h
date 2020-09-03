@@ -31,8 +31,13 @@ private:
 		void SetColor( Color c_in );
 		void ToggleState();
 		bool IsAlive() const;
+		bool IsTransitioning() const;
 		Vec2 GetPos() const;
-		void Update( const Board& brd,float dt );
+
+		/// <summary>
+		/// Returns true if the cell finished transitioning and is finally dead
+		/// </summary>
+		bool Update( const Board& brd,float dt );
 	private:
 		void UpdateRotation( const Board& brd,float dt );
 	public:
@@ -49,6 +54,7 @@ private:
 		float rotSpeed;
 		Color c;
 		bool isAlive = false;
+		bool isTransitioning = false;
 
 	public:
 		static float GetSize()
@@ -107,7 +113,7 @@ private:
 	const int nCellsUp;
 	std::vector<std::unique_ptr<Cell>> cellPtrs;
 	std::vector<Cell*> aliveCellPtrs;
-	std::unordered_set<Cell*> changedStates;
+	std::unordered_set<Cell*> updateCellPtrs;
 
 	static constexpr int borderThickness = 3;
 	std::vector<std::vector<Vec2>> borderModels;
