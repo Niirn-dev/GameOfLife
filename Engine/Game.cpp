@@ -28,7 +28,11 @@ Game::Game( MainWindow& wnd )
 	:
 	wnd( wnd ),
 	gfx( wnd ),
-	pBrd( std::make_unique<Board>() )
+	ct( gfx ),
+	cam( ct ),
+	camCtrl( wnd.mouse,wnd.kbd,cam ),
+	mouseIn( wnd.mouse,cam,ct ),
+	brd( boardWidth,boardHeight )
 {
 }
 
@@ -43,66 +47,58 @@ void Game::Go()
 void Game::UpdateModel()
 {
 	const float dt = ft.Mark();
-	// Manage player keyboard
+
+	ParseInput( dt );
+
+	brd.Update( dt );
+}
+
+void Game::ParseInput( float dt )
+{
+	// Handle continious keyboard states
+	camCtrl.UpdateKeyboard( dt );
+
+	// Handle keyboard events
 	while ( !wnd.kbd.KeyIsEmpty() )
 	{
 		auto e = wnd.kbd.ReadKey();
-		if ( e.IsPress() )
+		camCtrl.UpdateKeyboardEvent( e,dt );
+		if ( e.IsPress() && e.GetCode() == VK_SPACE )
 		{
-			switch ( e.GetCode() )
-			{
-			case VK_SPACE:
-				isSimulationPaused = !isSimulationPaused;
-				break;
-			case 'R':
-				pBrd.reset();
-				pBrd = std::make_unique<Board>();
-				isSimulationPaused = true;
-				break;
-			default:
-				break;
-			}
+			brd.OnPauseClick();
 		}
 	}
 
-	if ( !isSimulationPaused )
+	// Handle mouse events
+	while ( !wnd.mouse.IsEmpty() )
 	{
-		elapsedTime += dt;
-		while ( elapsedTime >= stepTime )
+		auto e = wnd.mouse.Read();
+		camCtrl.UpdateMouseEvent( e,dt );
+		if ( e.GetType() == Mouse::Event::Type::RPress )
 		{
-			pBrd->Update();
-
-			elapsedTime -= stepTime;
-		}
-	}
-	else
-	{
-		// Manage player mouse inputs while paused
-		// Process events one at a time
-		while ( !wnd.mouse.IsEmpty() )
-		{
-			auto e = wnd.mouse.Read();
-			if ( e.GetType() == Mouse::Event::Type::LPress )
+			auto mpos = mouseIn.GetMousePos( e );
+			if ( brd.GetRect().Contains( mpos ) )
 			{
-				pBrd->ToggleCellState( e.GetPos() );
+				brd.OnToggleCellStateClick( mpos );
 			}
-		}
-		// Machine gun events
-		if ( wnd.mouse.RightIsPressed() )
-		{
-			pBrd->ToggleCellState( wnd.mouse.GetPos() );
 		}
 	}
 }
 
 void Game::ComposeFrame()
 {
-	if ( !isSimulationPaused )
+	std::vector<Drawable> drawables = std::move( brd.GetDrawables() );
+	for ( auto d : drawables )
 	{
-		pBrd->Draw( gfx,Colors::White );
+		if ( cam.ContainsDrawable( d ) )
+		{
+			cam.Draw( std::move( d ) );
+		}
 	}
-	else
+
+	drawables = std::move( brd.GetBorderDrawables() );
+	for ( auto d : drawables )
 	{
-		pBrd->Draw( gfx,{ 225,180,225 } );
+		cam.Draw( std::move( d ) );
 	}
 }

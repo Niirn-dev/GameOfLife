@@ -23,58 +23,83 @@ public:
 	{
 	}
 
-	Vec2_  operator+( const Vec2_& rhs ) const
+	Vec2_	operator-() const
+	{
+		return { -x,-y };
+	}
+	Vec2_	operator+( const Vec2_& rhs ) const
 	{
 		return Vec2_( x + rhs.x,y + rhs.y );
 	}
-	Vec2_& operator+=( const Vec2_& rhs )
+	Vec2_&	operator+=( const Vec2_& rhs )
 	{
 		return *this = *this + rhs;
 	}
-	Vec2_  operator*( float rhs ) const
+	Vec2_	operator*( T rhs ) const
 	{
 		return Vec2_( x * rhs,y * rhs );
 	}
-	Vec2_& operator*=( float rhs )
+	Vec2_&	operator*=( T rhs )
 	{
 		return *this = *this * rhs;
 	}
-	Vec2_  operator-( const Vec2_& rhs ) const
+	Vec2_	operator-( const Vec2_& rhs ) const
 	{
 		return Vec2_( x - rhs.x,y - rhs.y );
 	}
-	Vec2_& operator-=( const Vec2_& rhs )
+	Vec2_&	operator-=( const Vec2_& rhs )
 	{
 		return *this = *this - rhs;
 	}
-	bool operator==( const Vec2_& rhs ) const
+	Vec2_	operator/( T rhs ) const
+	{
+		return { x / rhs,y / rhs };
+	}
+	Vec2_&	operator/=( T rhs )
+	{
+		return *this = *this / rhs;
+	}
+	bool	operator==( const Vec2_& rhs ) const
 	{
 		return ( x == rhs.x ) && ( y == rhs.y );
 	}
-	bool operator!=( const Vec2_& rhs ) const
+	bool	operator!=( const Vec2_& rhs ) const
 	{
 		return !( *this == rhs );
 	}
 
-	T GetLength() const
+	T		GetLength() const
 	{
 		return (T)std::sqrt( GetLengthSq() );
 	}
-	T GetLengthSq() const
+	T		GetLengthSq() const
 	{
 		return x * x + y * y;
 	}
-	Vec2_& Normalize()
+	Vec2_&	Normalize()
 	{
 		*this = GetNormalized();
 	}
-	Vec2_ GetNormalized() const
+	Vec2_	GetNormalized() const
 	{
 		const T len = GetLength();
 		if ( len != T( 0 ) )
 		{
 			return *this * ( T( 1 ) / len );
 		}
+		return *this;
+	}
+	Vec2_&	Rotate( T angle )
+	{
+		const T sint = std::sin( angle );
+		const T cost = std::cos( angle );
+		return Rotate( sint,cost );
+	}
+	Vec2_&	Rotate( T sint,T cost )
+	{
+		T new_x = x * cost - y * sint;
+		y = x * sint + y * cost;
+		x = new_x;
 		return *this;
 	}
 public:

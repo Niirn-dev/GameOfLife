@@ -1,7 +1,12 @@
 #pragma once
 
 #include "Vec2.h"
+#include <vector>
 
+/// <summary>
+/// Rectagle in math axis ( y positive direction is up )
+/// </summary>
+/// <typeparam name="T"></typeparam>
 template <typename T>
 class Rect_
 {
@@ -15,15 +20,20 @@ public:
 		bottom( bottom )
 	{
 	}
-	Rect_( const Vec2_<T>& topLeft,const Vec2_<T> bottomRight )
+	Rect_( const Vec2_<T>& bottomLeft,const Vec2_<T> topRight )
 		:
-		Rect_( topLeft,bottomRight.x - topLeft.x,bottomRight.y - topLeft.y )
+		Rect_( bottomLeft,topRight.x - bottomLeft.x,topRight.y - bottomLeft.y )
 	{
 	}
-	Rect_( const Vec2_<T>& topLeft,T width,T height )
+	Rect_( const Vec2_<T>& bottomLeft,T width,T height )
 		:
-		Rect_( topLeft.x,topLeft.x + width,topLeft.y,topLeft.y + height )
+		Rect_( bottomLeft.x,bottomLeft.x + width,bottomLeft.y + height,bottomLeft.y )
 	{
+	}
+	template<typename T2>
+	explicit operator Rect_<T2>() const
+	{
+		return { T2( left ),T2( right ),T2( top ),T2( bottom ) };
 	}
 
 	static Rect_ FromCenter( const Vec2_<T>& center,T halfWidth,T halfHeight )
@@ -33,35 +43,72 @@ public:
 	}
 	Rect_ GetExpanded( T offset ) const
 	{
-		return Rect_( left - offset,right + offset,top - offset,bottom + offset );
+		return Rect_( left - offset,right + offset,top + offset,bottom - offset );
 	}
 
-	bool IsOverlappingWith( const Rect_& other ) const
+	inline bool IsOverlappingWith( const Rect_& other ) const
 	{
 		return right > other.left && left < other.right && 
-			bottom > other.top && top < other.bottom;
+			bottom < other.top && top > other.bottom;
 	}
-	bool IsContainedBy( const Rect_& other ) const
+	inline bool IsContainedBy( const Rect_& other ) const
 	{
 		return left >= other.left && right <= other.right &&
-			top >= other.top && bottom <= other.bottom;
+			top <= other.top && bottom >= other.bottom;
 	}
-	bool Contains( const Vec2_<T>& point ) const
+	inline bool Contains( const Vec2_<T>& point ) const
 	{
-		return point.x >= left && point.x < right&& point.y >= top && point.y < bottom;
+		return point.x >= left && point.x <= right && point.y >= bottom && point.y <= top;
 	}
 
-	Vec2_<T> GetCenter() const
+	void Translate( const Vec2_<T>& offset )
+	{
+		left += offset.x;
+		right += offset.x;
+		top += offset.y;
+		bottom += offset.y;
+	}
+	Rect_ GetTranslated( const Vec2_<T>& offset ) const
+	{
+		Rect_ rect = *this;
+		return std::move( rect.Translate( offset ) );
+	}
+	void Scale( T factor )
+	{
+		left *= factor;
+		right *= factor;
+		top *= factor;
+		bottom *= factor;
+	}
+	void Scale( T factor_x,T factor_y )
+	{
+		left *= factor_x;
+		right *= factor_x;
+		top *= factor_y;
+		bottom *= factor_y;
+	}
+
+	inline Vec2_<T> GetCenter() const
 	{
 		return Vec2_<T>( ( left + right ) / T( 2 ),( top + bottom ) / T( 2 ) );
 	}
-	T GetWidth() const
+	inline T GetWidth() const
 	{
 		return right - left;
 	}
-	T GetHeight() const
+	inline T GetHeight() const
 	{
-		return bottom - top;
+		return top - bottom;
+	}
+	std::vector<Vec2_<T>> GetVeritices() const
+	{
+		std::vector<Vec2_<T>> verts;
+		verts.reserve( 4 );
+		verts.push_back( { left,bottom } );
+		verts.push_back( { left,top } );
+		verts.push_back( { right,top } );
+		verts.push_back( { right,bottom } );
+		return std::move( verts );
 	}
 
 public:

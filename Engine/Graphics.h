@@ -26,6 +26,7 @@
 #include "Colors.h"
 #include "Rect.h"
 #include <cassert>
+#include "Mat3.h"
 
 class Graphics
 {
@@ -60,11 +61,10 @@ public:
 	}
 	void PutPixel( int x,int y,Color c );
 	Color GetPixel( int x,int y ) const;
-	void DrawRect( int x0,int y0,int x1,int y1,Color c );
-	void DrawRect( const RectI& rect,Color c )
-	{
-		DrawRect( rect.left,rect.top,rect.right,rect.bottom,c );
-	}
+	void DrawLine( Vec2 p0,Vec2 p1,Color c );
+	void DrawRect( float left,float right,float top,float bottom,Color c );
+	void DrawClosedPolyline( const std::vector<Vec2>& verts,Color c );
+	void DrawClosedPolyline( const std::vector<Vec2>& verts,Color c,const Mat3& transformation );
 
 	~Graphics();
 private:
@@ -86,6 +86,6 @@ public:
 	static constexpr int ScreenHeight = 600;
 	static RectI GetScreenRect()
 	{
-		return RectI( 0,ScreenWidth,0,ScreenHeight );
+		return RectI( 0,ScreenWidth - 1,ScreenHeight - 1,0 );
 	};
 };

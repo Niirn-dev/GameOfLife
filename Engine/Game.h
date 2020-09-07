@@ -23,10 +23,14 @@
 #include "Keyboard.h"
 #include "Mouse.h"
 #include "Graphics.h"
-#include "Board.h"
 #include "FrameTimer.h"
 #include "Bencher.h"
 #include <memory>
+#include "CoordinatesTransformer.h"
+#include "Camera.h"
+#include "CameraController.h"
+#include "Board.h"
+#include "MouseInputTransformer.h"
 
 class Game
 {
@@ -40,6 +44,7 @@ private:
 	void UpdateModel();
 	/********************************/
 	/*  User Functions              */
+	void ParseInput( float dt );
 	/********************************/
 private:
 	MainWindow& wnd;
@@ -47,10 +52,13 @@ private:
 	/********************************/
 	/*  User Variables              */
 	FrameTimer ft;
+	CoordinatesTransformer ct;
+	Camera cam;
+	CameraController camCtrl;
+	MouseInputTransformer mouseIn;
 	Bencher b;
-	static constexpr float stepTime = 0.5f; ///< Set game step time to 1 second
-	float elapsedTime = 0.0f;
-	std::unique_ptr<Board> pBrd;
-	bool isSimulationPaused = true;
+	static constexpr float boardWidth = 1600.0f;
+	static constexpr float boardHeight = 1200.0f;
+	Board brd;
 	/********************************/
 };

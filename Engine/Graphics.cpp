@@ -325,15 +325,78 @@ Color Graphics::GetPixel( int x,int y ) const
 	return pSysBuffer[Graphics::ScreenWidth * y + x];
 }
 
-void Graphics::DrawRect( int x0,int y0,int x1,int y1,Color c )
+void Graphics::DrawLine( Vec2 p0,Vec2 p1,Color c )
 {
-	for ( int y = y0; y < y1; ++y )
+	int steps;
+	float dx = p1.x - p0.x;
+	float dy = p1.y - p0.y;
+	if ( std::abs( dx ) > std::abs( dy ) )
 	{
-		for ( int x = x0; x < x1; ++x )
+		steps = (int)std::abs( dx );
+	}
+	else
+	{
+		steps = (int)std::abs( dy );
+	}
+
+	dx = dx / (float)steps;
+	dy = dy / (float)steps;
+	for ( int i = 0; i < steps; ++i )
+	{
+		const int x = int( p0.x + dx * i );
+		const int y = int( p0.y + dy * i );
+		if ( GetScreenRect().Contains( Vei2{ x,y } ) )
 		{
 			PutPixel( x,y,c );
 		}
 	}
+}
+
+void Graphics::DrawRect( float left,float right,float top,float bottom,Color c )
+{
+	if ( left > right )
+	{
+		std::swap( left,right );
+	}
+	if ( top > bottom )
+	{
+		std::swap( top,bottom );
+	}
+
+	left = std::max( 0.0f,left );
+	right = std::min( float( Graphics::ScreenWidth - 1 ),right );
+	top = std::max( 0.0f,top );
+	bottom = std::min( float( Graphics::ScreenHeight - 1 ),bottom );
+
+	for ( int y = (int)top; y <= (int)bottom; ++y )
+	{
+		for ( int x = (int)left; x <= (int)right; ++x )
+		{
+			PutPixel( x,y,c );
+		}
+	}
+}
+
+void Graphics::DrawClosedPolyline( const std::vector<Vec2>& verts,Color c )
+{
+	for ( auto vit = verts.begin(); vit != std::prev( verts.end() ); ++vit )
+	{
+		DrawLine( *vit,*std::next( vit ),c );
+	}
+	DrawLine( verts.back(),verts.front(),c );
+}
+
+void Graphics::DrawClosedPolyline( const std::vector<Vec2>& verts,Color c,const Mat3& transformation )
+{
+	const auto front = transformation * verts.front();
+	auto cur = front;
+	for ( auto vit = verts.begin(); vit != std::prev( verts.end() ); ++vit )
+	{
+		const auto next = transformation * *std::next( vit );
+		DrawLine( cur,next,c );
+		cur = next;
+	}
+	DrawLine( cur,front,c );
 }
 
 //////////////////////////////////////////////////
