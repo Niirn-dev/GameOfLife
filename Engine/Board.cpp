@@ -12,11 +12,22 @@ Board::Cell::Cell( const Vec2& pos,Color c,float rotSpeed/*= 0.0f*/ )
 	c( c ),
 	rotSpeed( rotSpeed )
 {
+	GenerateSelectionModels();
 }
 
 void Board::Cell::SetModel( std::vector<Vec2> model_in )
 {
 	model = std::move( model_in );
+}
+
+void Board::Cell::GenerateSelectionModels()
+{
+	selectionModels.resize( selectionThickness );
+	for ( int i = 0; i < selectionThickness; ++i )
+	{
+		selectionModels.reserve( 4 );
+		selectionModels[i] = std::move( GetRect().GetExpanded( -float( i + 1 ) ).GetVeritices() );
+	}
 }
 
 Board::Cell::Cell( const Vec2& pos,Color c,std::vector<Vec2> model,float rotSpeed/* = 0.0f*/ )
@@ -59,17 +70,6 @@ float Board::Cell::GetAngle() const
 	return angle;
 }
 
-Drawable Board::Cell::GetDrawable() const
-{
-	Drawable drawable( model,c,std::move( GetRect() ) );
-	drawable.ApplyTransformation(
-		Mat3::Translate( pos ) *
-		Mat3::Rotate( angle ) *
-		Mat3::Scale( scale )
-	);
-	return std::move( drawable );
-}
-
 void Board::Cell::SetColor( Color c_in )
 {
 	c = c_in;
@@ -91,9 +91,42 @@ bool Board::Cell::IsTransitioning() const
 	return isTransitioning;
 }
 
+void Board::Cell::ToggleSelection()
+{
+	isSelected = !isSelected;
+}
+
+bool Board::Cell::IsSelected() const
+{
+	return isSelected;
+}
+
 Vec2 Board::Cell::GetPos() const
 {
 	return pos;
+}
+
+Drawable Board::Cell::GetDrawable() const
+{
+	Drawable drawable( model,c,std::move( GetRect() ) );
+	drawable.ApplyTransformation(
+		Mat3::Translate( pos ) *
+		Mat3::Rotate( angle ) *
+		Mat3::Scale( scale )
+	);
+	return std::move( drawable );
+}
+
+std::vector<Drawable> Board::Cell::GetSelectionDrawables() const
+{
+	std::vector<Drawable> drawables;
+	drawables.reserve( selectionThickness );
+	for ( int i = 0; i < selectionThickness; ++i )
+	{
+		drawables.emplace_back( selectionModels[i],selectionColor,GetRect() );
+	}
+
+	return drawables;
 }
 
 bool Board::Cell::Update( const Board& brd,float dt )
@@ -317,6 +350,10 @@ void Board::OnToggleCellStateClick( const Vec2& screenPos )
 {
 	Cell& cell = CellAtScreen( screenPos );
 	cell.ToggleState();
+	if ( isPaused )
+	{
+		cell.ToggleSelection();
+	}
 	updateCellPtrs.insert( &cell );
 	if ( cell.IsAlive() )
 	{
@@ -331,6 +368,17 @@ void Board::OnToggleCellStateClick( const Vec2& screenPos )
 void Board::OnPauseClick()
 {
 	isPaused = !isPaused;
+
+	if ( !isPaused )
+	{
+		for ( auto& pc : updateCellPtrs )
+		{
+			if ( pc->IsSelected() )
+			{
+				pc->ToggleSelection();
+			}
+		}
+	}
 }
 
 std::vector<Drawable> Board::GetDrawables() const
@@ -341,6 +389,11 @@ std::vector<Drawable> Board::GetDrawables() const
 	{
 		assert( pc->IsAlive() || pc->IsTransitioning() );
 		drawables.push_back( std::move( pc->GetDrawable() ) );
+	}
+
+	if ( isPaused )
+	{
+		AppendCellSelectionDrawables( drawables );
 	}
 
 	return std::move( drawables );
@@ -361,6 +414,20 @@ std::vector<Drawable> Board::GetBorderDrawables() const
 	}
 
 	return drawables;
+}
+
+void Board::AppendCellSelectionDrawables( std::vector<Drawable>& drawables ) const
+{
+	assert( isPaused );
+	std::vector<Drawable> selections;
+	for ( const auto& pc : updateCellPtrs )
+	{
+		if ( pc->IsSelected() )
+		{
+			selections = std::move( pc->GetSelectionDrawables() );
+			std::copy( std::make_move_iterator( selections.begin() ),std::make_move_iterator( selections.end() ),std::back_inserter( drawables ) );
+		}
+	}
 }
 
 int Board::CountAliveNeighbors( const Cell* target ) const

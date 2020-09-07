@@ -68,6 +68,11 @@ public:
 		top += offset.y;
 		bottom += offset.y;
 	}
+	Rect_ GetTranslated( const Vec2_<T>& offset ) const
+	{
+		Rect_ rect = *this;
+		return std::move( rect.Translate( offset ) );
+	}
 	void Scale( T factor )
 	{
 		left *= factor;

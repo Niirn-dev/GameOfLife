@@ -18,6 +18,7 @@ private:
 		Cell( const Vec2& pos,Color c,float rotSpeed = 0.0f );
 		void SetModel( std::vector<Vec2> model_in );
 	private:
+		void GenerateSelectionModels();
 		Cell( const Vec2& pos,Color c,std::vector<Vec2> model,float rotSpeed = 0.0f );
 	public:
 		static Cell MakeDefault( const Vec2& pos,Color c );
@@ -25,14 +26,23 @@ private:
 
 		void SetScale( float s );
 		float GetScale() const;
+
 		void SetAngle( float a );
 		float GetAngle() const;
-		Drawable GetDrawable() const;
+
 		void SetColor( Color c_in );
+
 		void ToggleState();
 		bool IsAlive() const;
 		bool IsTransitioning() const;
+
+		void ToggleSelection();
+		bool IsSelected() const;
+
 		Vec2 GetPos() const;
+
+		Drawable GetDrawable() const;
+		std::vector<Drawable> GetSelectionDrawables() const;
 
 		/// <summary>
 		/// Returns true if the cell finished transitioning and is finally dead
@@ -55,6 +65,11 @@ private:
 		Color c;
 		bool isAlive = false;
 		bool isTransitioning = false;
+
+		bool isSelected = false;
+		static constexpr int selectionThickness = 2;
+		static constexpr Color selectionColor = Colors::Red;
+		std::vector<std::vector<Vec2>> selectionModels;
 
 	public:
 		static float GetSize()
@@ -94,6 +109,8 @@ public:
 	std::vector<Drawable> GetDrawables() const;
 	RectF GetRect() const;
 	std::vector<Drawable> GetBorderDrawables() const;
+private:
+	void AppendCellSelectionDrawables( std::vector<Drawable>& drawables ) const;
 
 private:
 	int CountAliveNeighbors( const Cell* target ) const;
